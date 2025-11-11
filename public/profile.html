@@ -468,7 +468,7 @@
         async function loadProfile(userId) {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`/api/users/${userId}`, {
+                const response = await fetch(`https://med-u6e4.onrender.com/api/users/${userId}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -564,7 +564,7 @@
         async function checkAppointmentForRating(doctorId) {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`/api/appointments?doctor=${doctorId}&status=completed`, {
+                const response = await fetch(`https://med-u6e4.onrender.com/api/appointments?doctor=${doctorId}&status=completed`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (response.ok) {
@@ -592,7 +592,7 @@
             try {
                 const token = localStorage.getItem('token');
                 const feedback = isSatisfied ? 'qoniqdim' : 'qoniqmadim';
-                const response = await fetch(`/api/appointments/${lastAppointmentId}`, {
+                const response = await fetch(`https://med-u6e4.onrender.com/api/appointments/${lastAppointmentId}`, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -637,7 +637,7 @@
         async function toggleFollow(userId) {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`/api/users/${userId}/follow`, {
+                const response = await fetch(`https://med-u6e4.onrender.com/api/users/${userId}/follow`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -659,7 +659,7 @@
         async function startChat(userId) {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch('/api/chats', {
+                const response = await fetch('https://med-u6e4.onrender.com/api/chats', {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -681,7 +681,7 @@
         async function loadChats() {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch('/api/chats', {
+                const response = await fetch('https://med-u6e4.onrender.com/api/chats', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (response.ok) {
@@ -732,7 +732,7 @@
             
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`/api/chats/${currentChatId}/messages`, {
+                const response = await fetch(`https://med-u6e4.onrender.com/api/chats/${currentChatId}/messages`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -786,7 +786,7 @@
             
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`/api/users/${currentUser.id}`, {
+                const response = await fetch(`https://med-u6e4.onrender.com/api/users/${currentUser.id}`, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -812,7 +812,7 @@
         async function loadUserPosts(userId) {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`/api/posts?author=${userId}`, {
+                const response = await fetch(`https://med-u6e4.onrender.com/api/posts?author=${userId}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }

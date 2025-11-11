@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot - Hallallaymm Tibbiyot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'teal-gold': {
+                            50: '#ecfdf5',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e'
+                        },
+                        'gold-accent': '#f59e0b'
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.6s ease-out forwards',
+                        'stagger-fade': 'staggerFade 0.3s ease-out forwards',
+                        'pulse-slow': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'spin-slow': 'spin 1s linear infinite',
+                        'slide-in-right': 'slideInRight 0.5s ease-out forwards',
+                        'typewriter': 'typewriter 2s steps(40) forwards',
+                        'blink': 'blink 0.75s infinite'
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        },
+                        staggerFade: {
+                            '0%': { opacity: '0', transform: 'scale(0.95)' },
+                            '100%': { opacity: '1', transform: 'scale(1)' }
+                        },
+                        slideInRight: {
+                            '0%': { transform: 'translateX(100%)', opacity: '0' },
+                            '100%': { transform: 'translateX(0)', opacity: '1' }
+                        },
+                        typewriter: {
+                            '0%': { width: '0' },
+                            '100%': { width: '100%' }
+                        },
+                        blink: {
+                            '0%, 50%': { borderColor: 'transparent' },
+                            '51%, 100%': { borderColor: 'currentColor' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .stagger-item:nth-child(1) { animation-delay: 0.1s; }
+        .stagger-item:nth-child(2) { animation-delay: 0.2s; }
+        .stagger-item:nth-child(3) { animation-delay: 0.3s; }
+        .stagger-item:nth-child(4) { animation-delay: 0.4s; }
+        .stagger-item:nth-child(5) { animation-delay: 0.5s; }
+        .stagger-item:nth-child(6) { animation-delay: 0.6s; }
+        .brand-text {
+            background: linear-gradient(135deg, #14b8a6, #0d9488);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 10px rgba(20, 184, 166, 0.5);
+        }
+        .gold-glow {
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+        }
+        .avatar-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .avatar-hover:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(20, 184, 166, 0.3);
+        }
+        .field-focus {
+            transform: scale(1.02);
+            box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.2);
+        }
+        .typing-indicator {
+            display: inline-block;
+            width: 0;
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 2px solid;
+            animation: typewriter 2s steps(40) forwards, blink 0.75s infinite;
+        }
+        .message-typing .typing-indicator::after {
+            content: '|';
+        }
+        .quick-buttons {
+            display: flex;
+            overflow-x: auto;
+            gap: 0.75rem;
+            padding: 0.5rem 0;
+            scrollbar-width: thin;
+            scrollbar-color: #14b8a6 transparent;
+        }
+        .quick-buttons::-webkit-scrollbar {
+            height: 6px;
+        }
+        .quick-buttons::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .quick-buttons::-webkit-scrollbar-thumb {
+            background: #14b8a6;
+            border-radius: 3px;
+        }
+        .quick-buttons button {
+            flex: 0 0 auto;
+            white-space: nowrap;
+            min-width: 120px;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-teal-gold-50 to-gray-50">
+    <!-- Header -->
+    <header class="bg-teal-600 text-white shadow-lg fixed w-full top-0 z-50 transition-all duration-300">
+        <nav class="flex justify-between items-center p-4 max-w-7xl mx-auto">
+            <div class="nav-brand flex items-center gap-2">
+                <div class="w-8 h-8 bg-black rounded-full flex items-center justify-center gold-glow">
+                    <span class="text-xs font-bold text-teal-gold-500">H</span>
+                </div>
+                <h2 class="text-xl md:text-2xl font-bold brand-text">Hallallaymm Tibbiyot</h2>
+            </div>
+            <div class="nav-links hidden md:flex space-x-6">
+                <a href="/index" class="hover:text-teal-200 transition-colors px-2 py-1 rounded">Asosiy</a>
+                <a href="/doctor" class="hover:text-teal-200 transition-colors px-2 py-1 rounded">Shifokorlar</a>
+                <a href="/chatbot" class="hover:text-teal-200 transition-colors px-2 py-1 rounded bg-teal-700">Chatbot</a>
+                <a href="/create" class="hover:text-teal-200 transition-colors px-2 py-1 rounded">Post yaratish</a>
+                <a href="/profile" class="hover:text-teal-200 transition-colors px-2 py-1 rounded">Profil</a>
+                <a href="#" id="logoutBtn" class="bg-gold-accent hover:bg-amber-500 px-4 py-2 rounded transition-colors">Chiqish</a>
+            </div>
+            <!-- Mobile menu button -->
+            <button class="md:hidden text-white" id="mobileMenuBtn">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </nav>
+        <!-- Mobile menu -->
+        <div id="mobileMenu" class="md:hidden hidden bg-teal-700 px-4 py-2 space-y-2">
+            <a href="/index" class="block hover:bg-teal-600 px-3 py-2 rounded">Asosiy</a>
+            <a href="/doctor" class="block hover:bg-teal-600 px-3 py-2 rounded">Shifokorlar</a>
+            <a href="/chatbot" class="block hover:bg-teal-600 px-3 py-2 rounded bg-teal-500">Chatbot</a>
+            <a href="/create" class="block hover:bg-teal-600 px-3 py-2 rounded">Post yaratish</a>
+            <a href="/profile" class="block hover:bg-teal-600 px-3 py-2 rounded">Profil</a>
+            <a href="#" id="mobileLogout" class="block bg-gold-accent hover:bg-amber-500 px-3 py-2 rounded text-center">Chiqish</a>
+        </div>
+    </header>
+
+    <!-- Spacer for fixed header -->
+    <div class="h-20"></div>
+
+    <main class="container mx-auto px-4 py-4 max-w-7xl flex-1">
+        <div class="chatbot-container bg-white rounded-2xl shadow-2xl overflow-hidden gold-glow animate-fade-in-up h-[calc(100vh-5rem)] flex flex-col">
+            <!-- Header -->
+            <div class="chatbot-header bg-gradient-to-r from-teal-600 to-teal-700 text-white p-4 md:p-6 text-center flex-shrink-0">
+                <div class="flex items-center justify-center gap-3 mb-2">
+                    <div class="w-10 h-10 md:w-12 md:h-12 bg-white/20 rounded-full flex items-center justify-center">
+                        <svg class="w-6 h-6 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                        </svg>
+                    </div>
+                    <h1 class="text-xl md:text-3xl font-bold">Tibbiy Yordamchi</h1>
+                </div>
+                <p class="text-teal-100 text-sm md:text-base">Savolingizni yozing, men sizga yordam beraman. Dori-darmonlar (masalan, paracetamol tarkibi va foydalanishi), kasalliklar, maslahatlar bo'yicha batafsil javob beraman.</p>
+            </div>
+
+            <!-- Messages container -->
+            <div class="chatbot-messages flex-1 overflow-y-auto p-3 md:p-6 space-y-4" id="chatbotMessages">
+                <!-- Initial bot message with stagger animation -->
+                <div class="message bot-message stagger-item animate-stagger-fade opacity-0">
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 md:w-10 md:h-10 bg-teal-600 rounded-full flex items-center justify-center flex-shrink-0">
+                            <svg class="w-5 h-5 md:w-6 md:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                            </svg>
+                        </div>
+                        <div class="bg-teal-50 p-2 md:p-3 rounded-2xl rounded-tr-none max-w-[80%]">
+                            <p class="text-gray-800 text-sm md:text-base"><strong>Salom!</strong> Men tibbiy yordamchi botman. Dori-darmonlar (masalan, paracetamol tarkibi va foydalanishi), kasalliklar, maslahatlar bo'yicha batafsil javob beraman. Quyidagi tez savollardan foydalaning yoki o'zingiz yozing:</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick questions -->
+            <div class="quick-questions bg-gray-50 p-3 md:p-6 border-t border-teal-100 flex-shrink-0">
+                <h4 class="text-base md:text-lg font-semibold text-gray-800 mb-3 md:mb-4 brand-text">Tez savollar:</h4>
+                <div class="quick-buttons">
+                    <button onclick="askQuestion('Bosh og\'rig\'i uchun nima qilish kerak?')" class="bg-teal-100 hover:bg-teal-200 text-teal-700 px-3 py-2 md:px-4 md:py-3 rounded-xl font-semibold transition-all stagger-item animate-stagger-fade opacity-0 text-sm md:text-base">Bosh og'rig'i</button>
+                    <button onclick="askQuestion('Qorin og\'rig\'i belgilari va davolash?')" class="bg-teal-100 hover:bg-teal-200 text-teal-700 px-3 py-2 md:px-4 md:py-3 rounded-xl font-semibold transition-all stagger-item animate-stagger-fade opacity-0 text-sm md:text-base">Qorin og'rig'i</button>
+                    <button onclick="askQuestion('Isitma bilan nima qilish kerak?')" class="bg-teal-100 hover:bg-teal-200 text-teal-700 px-3 py-2 md:px-4 md:py-3 rounded-xl font-semibold transition-all stagger-item animate-stagger-fade opacity-0 text-sm md:text-base">Isitma</button>
+                    <button onclick="askQuestion('Shamollash belgilari va oldini olish?')" class="bg-teal-100 hover:bg-teal-200 text-teal-700 px-3 py-2 md:px-4 md:py-3 rounded-xl font-semibold transition-all stagger-item animate-stagger-fade opacity-0 text-sm md:text-base">Shamollash</button>
+                    <button onclick="askQuestion('Yurak og\'rig\'i jiddiy emasmi?')" class="bg-teal-100 hover:bg-teal-200 text-teal-700 px-3 py-2 md:px-4 md:py-3 rounded-xl font-semibold transition-all stagger-item animate-stagger-fade opacity-0 text-sm md:text-base">Yurak og'rig'i</button>
+                    <button onclick="askQuestion('Paracetamol tarkibi va foydalanishi?')" class="bg-teal-100 hover:bg-teal-200 text-teal-700 px-3 py-2 md:px-4 md:py-3 rounded-xl font-semibold transition-all stagger-item animate-stagger-fade opacity-0 text-sm md:text-base">Paracetamol</button>
+                    <button onclick="askQuestion('Vitamin D foydalari va yetishmovchiligi?')" class="bg-teal-100 hover:bg-teal-200 text-teal-700 px-3 py-2 md:px-4 md:py-3 rounded-xl font-semibold transition-all stagger-item animate-stagger-fade opacity-0 text-sm md:text-base">Vitamin D</button>
+                    <button onclick="askQuestion('Qon bosimi qanday o\'lchanadi?')" class="bg-teal-100 hover:bg-teal-200 text-teal-700 px-3 py-2 md:px-4 md:py-3 rounded-xl font-semibold transition-all stagger-item animate-stagger-fade opacity-0 text-sm md:text-base">Qon bosimi</button>
+                    <button onclick="askQuestion('Diabet belgilari nima?')" class="bg-teal-100 hover:bg-teal-200 text-teal-700 px-3 py-2 md:px-4 md:py-3 rounded-xl font-semibold transition-all stagger-item animate-stagger-fade opacity-0 text-sm md:text-base">Diabet</button>
+                    <button onclick="askQuestion('Uyqu yetishmovchiligi zarari?')" class="bg-teal-100 hover:bg-teal-200 text-teal-700 px-3 py-2 md:px-4 md:py-3 rounded-xl font-semibold transition-all stagger-item animate-stagger-fade opacity-0 text-sm md:text-base">Uyqu muammolari</button>
+                </div>
+            </div>
+
+            <!-- Input area -->
+            <div class="chatbot-input bg-white p-3 md:p-6 border-t border-teal-100 flex gap-3 flex-shrink-0">
+                <input type="text" id="userInput" placeholder="Savolingizni yozing... (masalan: Parastamol tarkibi va foydalanishi?)" 
+                       class="flex-1 p-3 md:p-4 border border-teal-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all field-focus text-sm md:text-base">
+                <button onclick="sendMessage()" class="bg-teal-600 hover:bg-teal-700 text-white px-4 md:px-6 py-3 md:py-4 rounded-2xl font-semibold transition-all animate-pulse-slow flex items-center gap-2 text-sm md:text-base">
+                    <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-2-9-9 2 2-9-9-2 2 9 9-2-2 9z"></path>
+                    </svg>
+                    Yuborish
+                </button>
+            </div>
+
+            <!-- Recommended doctors -->
+            <div id="recommendedDoctors" class="recommended-doctors hidden bg-gradient-to-r from-teal-50 to-teal-100 p-4 md:p-6 border-t border-teal-200 flex-shrink-0">
+                <h4 class="text-lg md:text-xl font-bold text-gray-800 mb-3 md:mb-4 brand-text">Tavsiya etilgan shifokorlar:</h4>
+                <div id="doctorsList" class="doctors-list grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                    <!-- Tavsiya etilgan shifokorlar -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentUser = null;
+        let isProcessing = false; // Oldini olish uchun: bir vaqtda faqat bitta so'rov
+
+        // Mobile menu setup
+        function setupMobileMenu() {
+            const btn = document.getElementById('mobileMenuBtn');
+            const menu = document.getElementById('mobileMenu');
+            btn.addEventListener('click', () => {
+                menu.classList.toggle('hidden');
+            });
+        }
+
+        // Typing indicator
+        function showTypingIndicator() {
+            const messagesContainer = document.getElementById('chatbotMessages');
+            const typingElement = document.createElement('div');
+            typingElement.className = 'message bot-message message-typing flex items-start gap-3';
+            typingElement.innerHTML = `
+                <div class="w-8 h-8 md:w-10 md:h-10 bg-teal-600 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 md:w-6 md:h-6 text-white animate-spin-slow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                </div>
+                <div class="bg-teal-50 p-2 md:p-3 rounded-2xl rounded-tr-none max-w-[80%]">
+                    <div class="typing-indicator text-gray-500 text-sm md:text-base">Bot javob berishda...</div>
+                </div>
+            `;
+            messagesContainer.appendChild(typingElement);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            return typingElement;
+        }
+
+        function removeTypingIndicator(typingElement) {
+            if (typingElement) {
+                typingElement.remove();
+            }
+        }
+
+        // Savollarni ajratish funksiyasi (masalan, "?" yoki "." bo'yicha)
+        function splitQuestions(message) {
+            // "?" bo'yicha ajratish va trim qilish
+            let questions = message.split('?').map(q => q.trim()).filter(q => q.length > 0);
+            // Agar "?" bo'lmasa, "." bo'yicha sinab ko'rish
+            if (questions.length === 1 && !message.includes('?')) {
+                questions = message.split('.').map(q => q.trim()).filter(q => q.length > 0);
+            }
+            // Har biriga "?" qo'shish va qisqa bo'lmaganlarni olish
+            return questions.map(q => q + '?').filter(q => q.length > 10);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setupMobileMenu();
+            const token = localStorage.getItem('token');
+            const userData = localStorage.getItem('user');
+            
+            if (!token || !userData) {
+                window.location.href = '/';
+                return;
+            }
+            
+            currentUser = JSON.parse(userData);
+            
+            // Enter bosganda xabar yuborish
+            document.getElementById('userInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !isProcessing) {
+                    sendMessage();
+                }
+            });
+
+            // Stagger animation boshlash
+            setTimeout(() => {
+                document.querySelectorAll('.stagger-item').forEach((item, index) => {
+                    item.classList.remove('opacity-0');
+                });
+            }, 100);
+        });
+
+        function askQuestion(question) {
+            if (isProcessing) return; // Oldini olish
+            document.getElementById('userInput').value = question;
+            sendMessage();
+        }
+
+        async function sendMessage() {
+            if (isProcessing) return;
+            const input = document.getElementById('userInput');
+            let message = input.value.trim();
+            
+            if (!message) return;
+            
+            isProcessing = true;
+            input.disabled = true;
+            
+            // Foydalanuvchi xabarini qo'shish
+            addMessage(message, 'user');
+            input.value = '';
+            
+            // Savollarni ajratish va har biriga alohida javob olish
+            const questions = splitQuestions(message);
+            if (questions.length > 1) {
+                // Birinchi savolni yuborish, keyin kechikish bilan qolganlarini
+                for (let i = 0; i < questions.length; i++) {
+                    await processSingleQuestion(questions[i]);
+                    if (i < questions.length - 1) {
+                        await new Promise(resolve => setTimeout(resolve, 1500)); // 1.5 soniya kutish
+                    }
+                }
+            } else {
+                await processSingleQuestion(message);
+            }
+            
+            isProcessing = false;
+            input.disabled = false;
+            input.focus();
+        }
+
+        async function processSingleQuestion(singleMessage) {
+            const typingElement = showTypingIndicator();
+            
+            try {
+                const response = await fetch('/api/chatbot', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: singleMessage })
+                });
+                
+                removeTypingIndicator(typingElement);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Bot javobini qo'shish (typewriter effect bilan, unique ID bilan)
+                    addMessageWithTypewriter(data.response, 'bot');
+                    
+                    // Agar shifokorlar tavsiya qilinsa
+                    if (data.recommendedDoctors && data.recommendedDoctors.length > 0) {
+                        showRecommendedDoctors(data.recommendedDoctors);
+                    }
+                } else {
+                    removeTypingIndicator(typingElement);
+                    addMessage('Kechirasiz, xatolik yuz berdi. Iltimos, keyinroq urinib ko\'ring yoki batafsilroq savol bering.', 'bot');
+                }
+            } catch (error) {
+                removeTypingIndicator(typingElement);
+                console.error('Xatolik:', error);
+                addMessage('Kechirasiz, xatolik yuz berdi. Iltimos, keyinroq urinib ko\'ring yoki batafsilroq savol bering.', 'bot');
+            }
+        }
+
+        function addMessage(text, sender) {
+            const messagesContainer = document.getElementById('chatbotMessages');
+            const messageElement = document.createElement('div');
+            messageElement.className = `message ${sender}-message flex items-start gap-3`;
+            messageElement.innerHTML = `
+                <div class="w-8 h-8 md:w-10 md:h-10 bg-${sender === 'user' ? 'teal-600' : 'teal-600'} rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 md:w-6 md:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M${sender === 'user' ? 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' : 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z'}"></path>
+                    </svg>
+                </div>
+                <div class="bg-${sender === 'user' ? 'teal-600 text-white' : 'teal-50 text-gray-800'} p-2 md:p-3 rounded-2xl rounded-${sender === 'user' ? 'tl' : 'tr'}-none max-w-[80%]">
+                    <p class="whitespace-pre-wrap text-sm md:text-base">${text}</p>
+                </div>
+            `;
+            messagesContainer.appendChild(messageElement);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function addMessageWithTypewriter(text, sender) {
+            const messagesContainer = document.getElementById('chatbotMessages');
+            const messageElement = document.createElement('div');
+            messageElement.className = `message ${sender}-message flex items-start gap-3`;
+            const uniqueId = 'typewriter-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+            messageElement.innerHTML = `
+                <div class="w-8 h-8 md:w-10 md:h-10 bg-teal-600 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 md:w-6 md:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                    </svg>
+                </div>
+                <div class="bg-teal-50 p-2 md:p-3 rounded-2xl rounded-tr-none max-w-[80%]">
+                    <p id="${uniqueId}" class="whitespace-pre-wrap text-gray-800 text-sm md:text-base"></p>
+                </div>
+            `;
+            messagesContainer.appendChild(messageElement);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            // Typewriter effect
+            const textElement = document.getElementById(uniqueId);
+            let i = 0;
+            const typeInterval = setInterval(() => {
+                if (i < text.length) {
+                    textElement.textContent += text.charAt(i);
+                    i++;
+                } else {
+                    clearInterval(typeInterval);
+                }
+            }, 30);
+        }
+
+        function showRecommendedDoctors(doctors) {
+            const container = document.getElementById('recommendedDoctors');
+            const list = document.getElementById('doctorsList');
+            
+            list.innerHTML = '';
+            
+            doctors.forEach((doctor, index) => {
+                const doctorElement = document.createElement('div');
+                doctorElement.className = 'recommended-doctor flex items-center gap-3 md:gap-4 p-3 bg-white rounded-xl shadow-sm hover:shadow-md transition-all stagger-item animate-stagger-fade opacity-0';
+                doctorElement.style.animationDelay = (index % 2) * 0.1 + 's';
+                doctorElement.innerHTML = `
+                    <img src="${doctor.profile.avatar || '/uploads/avatars/default.png'}" 
+                         alt="Avatar" class="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover avatar-hover">
+                    <div class="flex-1 min-w-0">
+                        <h5 class="font-semibold text-gray-800 text-sm md:text-base truncate">${doctor.profile.firstName} ${doctor.profile.lastName}</h5>
+                        <p class="text-teal-600 text-xs md:text-sm">${doctor.profile.specialization}</p>
+                        <p class="text-gray-500 text-xs">⭐ ${ (doctor.profile.rating || 0).toFixed(1) }</p>
+                    </div>
+                    <button onclick="viewDoctorProfile('${doctor._id}')" class="bg-teal-600 hover:bg-teal-700 text-white px-3 py-2 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-semibold transition-all">
+                        Profil
+                    </button>
+                `;
+                // Animatsiyani boshlash
+                setTimeout(() => doctorElement.classList.remove('opacity-0'), 10);
+                list.appendChild(doctorElement);
+            });
+            
+            container.classList.remove('hidden');
+        }
+
+        function viewDoctorProfile(doctorId) {
+            window.location.href = `/profile?id=${doctorId}`;
+        }
+
+        // Chiqish
+        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/';
+        });
+        document.getElementById('mobileLogout').addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/';
+        });
+    </script>
+</body>
+</html>

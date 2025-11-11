@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hallallaymm Tibbiyot - Kirish/Ro'yxatdan o'tish</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'teal-gold': {
+                            50: '#ecfdf5',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e'
+                        },
+                        'gold-accent': '#f59e0b'
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.6s ease-out forwards',
+                        'pulse-slow': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'spin-slow': 'spin 1s linear infinite',
+                        'slide-in': 'slideIn 0.5s ease-out forwards'
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        },
+                        slideIn: {
+                            '0%': { transform: 'translateX(-100%)', opacity: '0' },
+                            '100%': { transform: 'translateX(0)', opacity: '1' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .brand-text {
+            background: linear-gradient(135deg, #14b8a6, #0d9488);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 10px rgba(20, 184, 166, 0.5);
+        }
+        .gold-glow {
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+        }
+        .tab-active {
+            background: linear-gradient(135deg, #14b8a6, #0d9488);
+            color: white;
+        }
+        .field-focus {
+            transform: scale(1.02);
+            box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.2);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-teal-gold-50 to-gray-50 flex items-center justify-center p-4">
+    <div class="auth-container max-w-md w-full bg-white rounded-2xl shadow-2xl overflow-hidden gold-glow animate-fade-in-up">
+        <!-- Brand Header -->
+        <div class="bg-teal-600 text-white p-6 text-center">
+            <div class="flex items-center justify-center gap-2 mb-2">
+                <div class="w-10 h-10 bg-black rounded-full flex items-center justify-center gold-glow">
+                    <span class="text-sm font-bold text-teal-gold-500">H</span>
+                </div>
+                <h1 class="text-2xl font-bold brand-text">Hallallaymm Tibbiyot</h1>
+            </div>
+            <p class="text-teal-100 text-sm">Sog'lig'ingiz uchun ishonchli platforma</p>
+        </div>
+
+        <!-- Tabs -->
+        <div class="auth-tabs flex border-b border-gray-200">
+            <button class="tab-btn flex-1 py-3 px-4 text-center font-semibold text-gray-700 hover:text-teal-600 transition-colors active" data-tab="login">Kirish</button>
+            <button class="tab-btn flex-1 py-3 px-4 text-center font-semibold text-gray-700 hover:text-teal-600 transition-colors" data-tab="register">Ro'yxatdan o'tish</button>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div class="bg-white p-6 rounded-xl gold-glow">
+                <div class="inline-block animate-spin-slow rounded-full h-8 w-8 border-b-2 border-teal-600 mx-auto mb-4"></div>
+                <p class="text-teal-600 text-center">Isklamaqda...</p>
+            </div>
+        </div>
+
+        <!-- Kirish formasi -->
+        <div id="login" class="tab-content p-6 space-y-4 active animate-slide-in">
+            <h2 class="text-2xl font-bold text-gray-800 text-center">Hisobingizga kiring</h2>
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <input type="email" name="email" placeholder="Email" required
+                           class="w-full p-4 border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all hover:gold-glow">
+                </div>
+                <div>
+                    <input type="password" name="password" placeholder="Parol" required
+                           class="w-full p-4 border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all hover:gold-glow">
+                </div>
+                <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white py-3 rounded-lg font-semibold transition-all animate-pulse-slow">
+                    Kirish
+                </button>
+                <div class="text-center">
+                    <a href="#" class="text-sm text-teal-600 hover:text-teal-700">Parolni unutdingizmi?</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Ro'yxatdan o'tish formasi -->
+        <div id="register" class="tab-content p-6 space-y-4 hidden">
+            <h2 class="text-2xl font-bold text-gray-800 text-center">Yangi hisob yarating</h2>
+            <form id="registerForm" enctype="multipart/form-data" class="space-y-4">
+                <div>
+                    <input type="text" name="username" placeholder="Foydalanuvchi nomi" required
+                           class="w-full p-4 border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all hover:gold-glow">
+                </div>
+                <div>
+                    <input type="email" name="email" placeholder="Email" required
+                           class="w-full p-4 border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all hover:gold-glow">
+                </div>
+                <div>
+                    <input type="password" name="password" placeholder="Parol" required
+                           class="w-full p-4 border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all hover:gold-glow">
+                </div>
+                
+                <select name="role" id="roleSelect" required
+                        class="w-full p-4 border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all hover:gold-glow">
+                    <option value="">Rolni tanlang</option>
+                    <option value="user">Bemor</option>
+                    <option value="doctor">Shifokor</option>
+                </select>
+
+                <!-- User Fields -->
+                <div id="userFields" class="space-y-4 hidden">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <input type="text" name="firstName" placeholder="Ism" 
+                               class="p-4 border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all hover:gold-glow">
+                        <input type="text" name="lastName" placeholder="Familiya" 
+                               class="p-4 border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all hover:gold-glow">
+                    </div>
+                    <input type="tel" name="phone" placeholder="Telefon raqami" 
+                           class="w-full p-4 border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all hover:gold-glow">
+                </div>
+
+                <!-- Doctor Fields -->
+                <div id="doctorFields" class="space-y-4 hidden">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <input type="text" name="firstName" placeholder="Ism" 
+                               class="p-4 border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all hover:gold-glow">
+                        <input type="text" name="lastName" placeholder="Familiya" 
+                               class="p-4 border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all hover:gold-glow">
+                    </div>
+                    <input type="tel" name="phone" placeholder="Telefon raqami" 
+                           class="w-full p-4 border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all hover:gold-glow">
+                    <input type="text" name="location" placeholder="Ish joyi manzili" 
+                           class="w-full p-4 border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all hover:gold-glow">
+                    <input type="text" name="specialization" placeholder="Mutaxassislik" 
+                           class="w-full p-4 border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all hover:gold-glow">
+                    <div>
+                        <input type="file" name="documents" multiple accept=".pdf,.jpg,.jpeg,.png"
+                               class="w-full p-4 border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all hover:gold-glow">
+                        <small class="text-gray-500 text-sm block mt-1">Diplom, shifokorlik pasporti va boshqa hujjatlarni yuklang (ixtiyoriy)</small>
+                    </div>
+                </div>
+
+                <div>
+                    <input type="file" name="avatar" accept="image/*"
+                           class="w-full p-4 border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all hover:gold-glow">
+                    <small class="text-gray-500 text-sm block mt-1">Profil rasmi (ixtiyoriy)</small>
+                </div>
+                <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white py-3 rounded-lg font-semibold transition-all animate-pulse-slow">
+                    Ro'yxatdan o'tish
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let isLoading = false;
+
+        // Loading ko'rsatish/yashirish
+        function showLoading(show) {
+            const overlay = document.getElementById('loadingOverlay');
+            overlay.classList.toggle('hidden', !show);
+            isLoading = show;
+        }
+
+        // Tab o'zgartirish
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (isLoading) return;
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('tab-active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+                
+                btn.classList.add('tab-active');
+                const targetTab = document.getElementById(btn.dataset.tab);
+                targetTab.classList.remove('hidden');
+                targetTab.classList.add('animate-slide-in');
+            });
+        });
+
+        // Rol o'zgartirganda formani sozlash va required ni dinamik o'rnatish
+        document.getElementById('roleSelect').addEventListener('change', function() {
+            const role = this.value;
+            const userFields = document.getElementById('userFields');
+            const doctorFields = document.getElementById('doctorFields');
+
+            userFields.classList.toggle('hidden', role !== 'user');
+            doctorFields.classList.toggle('hidden', role !== 'doctor');
+
+            // User fields inputlarini required qilish
+            const userInputs = userFields.querySelectorAll('input');
+            userInputs.forEach(input => {
+                input.required = role === 'user';
+            });
+
+            // Doctor fields inputlarini required qilish
+            const doctorInputs = doctorFields.querySelectorAll('input:not([type="file"])'); // File required emas
+            doctorInputs.forEach(input => {
+                input.required = role === 'doctor';
+            });
+
+            // Documents va avatar ixtiyoriy
+            const fileInputs = document.querySelectorAll('input[type="file"]');
+            fileInputs.forEach(input => {
+                input.required = false;
+            });
+        });
+
+        // Ro'yxatdan o'tish
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (isLoading) return;
+            
+            showLoading(true);
+            
+            const formData = new FormData(e.target);
+            const role = formData.get('role');
+            
+            console.log('Submitting register with role:', role); // Debug
+            
+            // Duplicate nomlarni tozalash va to'g'ri qiymatlarni o'rnatish
+            if (role === 'doctor') {
+                // User fields dan tozalash
+                const userFirstNameInput = document.querySelector('#userFields input[name="firstName"]');
+                const userLastNameInput = document.querySelector('#userFields input[name="lastName"]');
+                const userPhoneInput = document.querySelector('#userFields input[name="phone"]');
+                
+                if (userFirstNameInput && userFirstNameInput.value) formData.delete('firstName');
+                if (userLastNameInput && userLastNameInput.value) formData.delete('lastName');
+                if (userPhoneInput && userPhoneInput.value) formData.delete('phone');
+                
+                // Doctor fields dan o'rnatish
+                const doctorFirstName = document.querySelector('#doctorFields input[name="firstName"]').value || '';
+                const doctorLastName = document.querySelector('#doctorFields input[name="lastName"]').value || '';
+                const doctorPhone = document.querySelector('#doctorFields input[name="phone"]').value || '';
+                const doctorLocation = document.querySelector('#doctorFields input[name="location"]').value || '';
+                const doctorSpecialization = document.querySelector('#doctorFields input[name="specialization"]').value || '';
+                
+                formData.set('firstName', doctorFirstName);
+                formData.set('lastName', doctorLastName);
+                formData.set('phone', doctorPhone);
+                formData.set('location', doctorLocation);
+                formData.set('specialization', doctorSpecialization);
+            } else if (role === 'user') {
+                // Doctor fields dan tozalash
+                const doctorFirstNameInput = document.querySelector('#doctorFields input[name="firstName"]');
+                const doctorLastNameInput = document.querySelector('#doctorFields input[name="lastName"]');
+                const doctorPhoneInput = document.querySelector('#doctorFields input[name="phone"]');
+                const locationInput = document.querySelector('#doctorFields input[name="location"]');
+                const specializationInput = document.querySelector('#doctorFields input[name="specialization"]');
+                
+                if (doctorFirstNameInput && doctorFirstNameInput.value) formData.delete('firstName');
+                if (doctorLastNameInput && doctorLastNameInput.value) formData.delete('lastName');
+                if (doctorPhoneInput && doctorPhoneInput.value) formData.delete('phone');
+                if (locationInput && locationInput.value) formData.delete('location');
+                if (specializationInput && specializationInput.value) formData.delete('specialization');
+                
+                // User fields dan o'rnatish
+                const userFirstName = document.querySelector('#userFields input[name="firstName"]').value || '';
+                const userLastName = document.querySelector('#userFields input[name="lastName"]').value || '';
+                const userPhone = document.querySelector('#userFields input[name="phone"]').value || '';
+                
+                formData.set('firstName', userFirstName);
+                formData.set('lastName', userLastName);
+                formData.set('phone', userPhone);
+            }
+            
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                console.log('Register response:', data); // Debug
+                
+                if (response.ok) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    window.location.href = '/index';
+                } else {
+                    alert(data.message || 'Ro\'yxatdan o\'tishda xatolik yuz berdi');
+                }
+            } catch (error) {
+                console.error('Register fetch error:', error);
+                alert('Xatolik yuz berdi: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        });
+
+        // Kirish
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (isLoading) return;
+            
+            showLoading(true);
+            
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    localStorage.setItem('token', result.token);
+                    localStorage.setItem('user', JSON.stringify(result.user));
+                    window.location.href = '/index';
+                } else {
+                    alert(result.message || 'Kirishda xatolik yuz berdi');
+                }
+            } catch (error) {
+                console.error('Login fetch error:', error);
+                alert('Xatolik yuz berdi: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        });
+
+        // Agar token mavjud bo'lsa, avtomatik kirish
+        const token = localStorage.getItem('token');
+        if (token) {
+            window.location.href = '/index';
+        }
+
+        // Initial setup
+        document.addEventListener('DOMContentLoaded', () => {
+            const userFields = document.getElementById('userFields');
+            const doctorFields = document.getElementById('doctorFields');
+            userFields.classList.add('hidden');
+            doctorFields.classList.add('hidden');
+            
+            // Barcha conditional inputlarni required=false qilish
+            const allConditionalInputs = document.querySelectorAll('#userFields input, #doctorFields input');
+            allConditionalInputs.forEach(input => {
+                input.required = false;
+            });
+        });
+
+        // Focus animatsiyalari
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('input, select').forEach(input => {
+                input.addEventListener('focus', () => {
+                    input.classList.add('field-focus');
+                });
+                input.addEventListener('blur', () => {
+                    input.classList.remove('field-focus');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

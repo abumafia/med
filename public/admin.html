@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Hallallaymm Tibbiyot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'teal-gold': {
+                            50: '#ecfdf5',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e'
+                        },
+                        'gold-accent': '#f59e0b'
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.6s ease-out forwards',
+                        'stagger-fade': 'staggerFade 0.3s ease-out forwards',
+                        'pulse-slow': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'spin-slow': 'spin 1s linear infinite'
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        },
+                        staggerFade: {
+                            '0%': { opacity: '0', transform: 'scale(0.95)' },
+                            '100%': { opacity: '1', transform: 'scale(1)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .brand-text {
+            background: linear-gradient(135deg, #14b8a6, #0d9488);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 10px rgba(20, 184, 166, 0.5);
+        }
+        .gold-glow {
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+        }
+        .admin-item {
+            transition: all 0.3s ease;
+        }
+        .admin-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .avatar-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .avatar-hover:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(20, 184, 166, 0.3);
+        }
+        .stagger-item:nth-child(1) { animation-delay: 0.1s; }
+        .stagger-item:nth-child(2) { animation-delay: 0.2s; }
+        .stagger-item:nth-child(3) { animation-delay: 0.3s; }
+        .stagger-item:nth-child(4) { animation-delay: 0.4s; }
+        .stagger-item:nth-child(5) { animation-delay: 0.5s; }
+        .modal-overlay {
+            backdrop-filter: blur(5px);
+        }
+        .status-pending { color: #ffc107; }
+        .status-confirmed { color: #28a745; }
+        .status-completed { color: #17a2b8; }
+        .status-cancelled { color: #dc3545; }
+        .pending { border-left: 4px solid #ffc107; }
+        .tab-btn {
+            padding: 0.5rem 1rem;
+            margin: 0.25rem;
+            border: 1px solid #d1d5db;
+            background: #f9fafb;
+            cursor: pointer;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover {
+            background: #e5e7eb;
+        }
+        .tab-btn.active {
+            background: #14b8a6;
+            color: white;
+            border-color: #14b8a6;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-teal-gold-50 to-gray-50">
+    <!-- Header -->
+    <header class="bg-teal-600 text-white shadow-lg fixed w-full top-0 z-50 transition-all duration-300">
+        <nav class="flex justify-between items-center p-4 max-w-7xl mx-auto">
+            <div class="nav-brand flex items-center gap-2">
+                <div class="w-8 h-8 bg-black rounded-full flex items-center justify-center gold-glow">
+                    <span class="text-xs font-bold text-teal-gold-500">H</span>
+                </div>
+                <h2 class="text-xl md:text-2xl font-bold brand-text">Hallallaymm Tibbiyot - Admin</h2>
+            </div>
+            <div class="nav-links hidden md:flex space-x-6">
+                <a href="/index" class="hover:text-teal-200 transition-colors px-2 py-1 rounded">Asosiy</a>
+                <a href="/admin" class="hover:text-teal-200 transition-colors px-2 py-1 rounded bg-teal-700">Admin</a>
+                <a href="#" id="logoutBtn" class="bg-gold-accent hover:bg-amber-500 px-4 py-2 rounded transition-colors">Chiqish</a>
+            </div>
+            <!-- Mobile menu button -->
+            <button class="md:hidden text-white" id="mobileMenuBtn">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </nav>
+        <!-- Mobile menu -->
+        <div id="mobileMenu" class="md:hidden hidden bg-teal-700 px-4 py-2 space-y-2">
+            <a href="/index" class="block hover:bg-teal-600 px-3 py-2 rounded">Asosiy</a>
+            <a href="/admin" class="block hover:bg-teal-600 px-3 py-2 rounded bg-teal-500">Admin</a>
+            <a href="#" id="mobileLogout" class="block bg-gold-accent hover:bg-amber-500 px-3 py-2 rounded text-center">Chiqish</a>
+        </div>
+    </header>
+    <!-- Spacer for fixed header -->
+    <div class="h-20"></div>
+    <main class="container mx-auto px-4 py-8 max-w-7xl">
+        <div class="admin-container bg-white rounded-2xl shadow-2xl overflow-hidden gold-glow animate-fade-in-up">
+            <div class="p-6 md:p-8 border-b border-teal-100">
+                <h1 class="text-3xl md:text-4xl font-bold brand-text mb-4">Admin Panel</h1>
+                <p class="text-teal-700">Platforma boshqaruvi va monitoringi</p>
+            </div>
+            <!-- Umumiy statistika -->
+            <div class="admin-stats p-6 md:p-8 bg-gradient-to-r from-teal-50 to-teal-100" id="adminStats">
+                <!-- Statistika yuklanmoqda... -->
+            </div>
+           
+            <!-- Admin navigatsiya -->
+            <div class="admin-tabs bg-white border-t border-teal-100">
+                <div class="flex flex-wrap justify-center gap-2 p-4 md:p-6">
+                    <button class="tab-btn active stagger-item opacity-0" data-tab="users">Foydalanuvchilar</button>
+                    <button class="tab-btn stagger-item opacity-0" data-tab="doctors">Shifokorlar</button>
+                    <button class="tab-btn stagger-item opacity-0" data-tab="posts">Postlar</button>
+                    <button class="tab-btn stagger-item opacity-0" data-tab="appointments">Qabullar</button>
+                    <button class="tab-btn stagger-item opacity-0" data-tab="pending">Tasdiqlanishi kutilayotgan</button>
+                </div>
+            </div>
+           
+            <!-- Foydalanuvchilar -->
+            <div id="users" class="tab-content active p-6 md:p-8">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4 brand-text">Barcha Foydalanuvchilar</h3>
+                <div class="search-section flex flex-wrap gap-2 mb-6">
+                    <input type="text" id="searchUsers" placeholder="Foydalanuvchi qidirish..." class="flex-1 p-3 border border-teal-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    <button onclick="searchUsers()" class="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-xl font-semibold transition-all">Qidirish</button>
+                    <button onclick="loadUsers()" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-xl font-semibold transition-all">Tozalash</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table id="usersTable" class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ism-Familiya</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rol</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joylashuv</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Telefon</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ro'yxatdan o'tgan</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amallar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody" class="bg-white divide-y divide-gray-200">
+                            <!-- Foydalanuvchilar ro'yxati -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+           
+            <!-- Shifokorlar -->
+            <div id="doctors" class="tab-content p-6 md:p-8">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4 brand-text">Shifokorlar</h3>
+                <div class="search-section flex flex-wrap gap-2 mb-6">
+                    <input type="text" id="searchDoctors" placeholder="Shifokor qidirish..." class="flex-1 p-3 border border-teal-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    <button onclick="searchDoctors()" class="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-xl font-semibold transition-all">Qidirish</button>
+                    <button onclick="loadDoctors()" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-xl font-semibold transition-all">Tozalash</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table id="doctorsTable" class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ism-Familiya</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mutaxassislik</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joylashuv</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Telefon</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reyting</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Muvaffaqiyatli ishlar</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amallar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="doctorsTableBody" class="bg-white divide-y divide-gray-200">
+                            <!-- Shifokorlar ro'yxati -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+           
+            <!-- Postlar -->
+            <div id="posts" class="tab-content p-6 md:p-8">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4 brand-text">Barcha Postlar</h3>
+                <div class="search-section flex flex-wrap gap-2 mb-6">
+                    <input type="text" id="searchPosts" placeholder="Post qidirish..." class="flex-1 p-3 border border-teal-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    <button onclick="searchAdminPosts()" class="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-xl font-semibold transition-all">Qidirish</button>
+                    <button onclick="loadPosts()" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-xl font-semibold transition-all">Tozalash</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table id="postsTable" class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sarlavha</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Muallif</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategoriya</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Likes</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sana</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amallar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="postsTableBody" class="bg-white divide-y divide-gray-200">
+                            <!-- Postlar ro'yxati -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+           
+            <!-- Qabullar -->
+            <div id="appointments" class="tab-content p-6 md:p-8">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4 brand-text">Qabullar</h3>
+                <div class="search-section flex flex-wrap gap-2 mb-6">
+                    <select id="statusFilter" class="p-3 border border-teal-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        <option value="">Barchasi</option>
+                        <option value="pending">Kutilmoqda</option>
+                        <option value="confirmed">Tasdiqlangan</option>
+                        <option value="completed">Tugallangan</option>
+                        <option value="cancelled">Bekor qilingan</option>
+                    </select>
+                    <button onclick="filterAppointments()" class="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-xl font-semibold transition-all">Filtrlash</button>
+                    <button onclick="loadAppointments()" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-xl font-semibold transition-all">Tozalash</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table id="appointmentsTable" class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bemor</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Shifokor</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sana/Vaqt</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Holati</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reyting</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Izoh</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amallar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appointmentsTableBody" class="bg-white divide-y divide-gray-200">
+                            <!-- Qabullar ro'yxati -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+           
+            <!-- Tasdiqlanishi kutilayotgan shifokorlar -->
+            <div id="pending" class="tab-content p-6 md:p-8">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4 brand-text">Tasdiqlanishi Kutilayotgan Shifokorlar</h3>
+                <div class="overflow-x-auto">
+                    <table id="pendingTable" class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ism-Familiya</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mutaxassislik</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joylashuv</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Telefon</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hujjatlar</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amallar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pendingTableBody" class="bg-white divide-y divide-gray-200">
+                            <!-- Tasdiqlanishi kutilayotgan shifokorlar -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- Edit Modal -->
+            <div id="editModal" class="fixed inset-0 z-50 hidden modal-overlay bg-black bg-opacity-50 flex items-center justify-center p-4">
+                <div class="bg-white rounded-2xl p-6 md:p-8 max-w-md w-full max-h-[80vh] overflow-y-auto">
+                    <h3 id="modalTitle" class="text-xl font-bold mb-4 brand-text">Foydalanuvchini tahrirlash</h3>
+                    <form id="editForm">
+                        <input type="hidden" id="editId">
+                        <div class="mb-4">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Ism</label>
+                            <input type="text" id="editFirstName" class="w-full p-3 border border-teal-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Familiya</label>
+                            <input type="text" id="editLastName" class="w-full p-3 border border-teal-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+                            <input type="email" id="editEmail" class="w-full p-3 border border-teal-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Rol</label>
+                            <select id="editRole" class="w-full p-3 border border-teal-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                <option value="user">Foydalanuvchi</option>
+                                <option value="doctor">Shifokor</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                        <div class="flex justify-end gap-3 mt-6">
+                            <button type="button" onclick="closeModal()" class="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-xl transition-all">Bekor qilish</button>
+                            <button type="submit" class="px-6 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl transition-all">Saqlash</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        let currentUser = null;
+        let adminStats = null;
+        // Mobile menu setup
+        function setupMobileMenu() {
+            const btn = document.getElementById('mobileMenuBtn');
+            const menu = document.getElementById('mobileMenu');
+            btn.addEventListener('click', () => {
+                menu.classList.toggle('hidden');
+            });
+        }
+        document.addEventListener('DOMContentLoaded', async () => {
+            setupMobileMenu();
+            const token = localStorage.getItem('token');
+            const userData = localStorage.getItem('user');
+           
+            if (!token || !userData) {
+                window.location.href = '/';
+                return;
+            }
+           
+            currentUser = JSON.parse(userData);
+           
+            // Adminlikni tekshirish
+            if (currentUser.role !== 'admin') {
+                alert('Sizga admin paneliga kirish ruxsati yo\'q');
+                window.location.href = '/index';
+                return;
+            }
+           
+            await loadAdminStats();
+            setupTabs();
+            setupEditForm();
+            // Initial load for active tab
+            loadUsers();
+            // Stagger animation
+            setTimeout(() => {
+                document.querySelectorAll('.stagger-item').forEach(item => item.classList.remove('opacity-0'));
+            }, 100);
+        });
+        async function loadAdminStats() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/admin/stats', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+               
+                if (response.ok) {
+                    adminStats = await response.json();
+                    displayAdminStats();
+                } else {
+                    console.error('Stats yuklashda xatolik:', response.status);
+                }
+            } catch (error) {
+                console.error('Xatolik:', error);
+            }
+        }
+        function displayAdminStats() {
+            const container = document.getElementById('adminStats');
+            container.innerHTML = `
+                <div class="stats-grid grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
+                    <div class="stat-card bg-white p-6 rounded-xl shadow-md text-center stagger-item opacity-0">
+                        <h3 class="text-3xl font-bold text-teal-600">${adminStats.usersCount || 0}</h3>
+                        <p class="text-gray-600 mt-2">Foydalanuvchilar</p>
+                    </div>
+                    <div class="stat-card bg-white p-6 rounded-xl shadow-md text-center stagger-item opacity-0">
+                        <h3 class="text-3xl font-bold text-teal-600">${adminStats.doctorsCount || 0}</h3>
+                        <p class="text-gray-600 mt-2">Shifokorlar</p>
+                    </div>
+                    <div class="stat-card bg-white p-6 rounded-xl shadow-md text-center stagger-item opacity-0">
+                        <h3 class="text-3xl font-bold text-teal-600">${adminStats.postsCount || 0}</h3>
+                        <p class="text-gray-600 mt-2">Postlar</p>
+                    </div>
+                    <div class="stat-card bg-white p-6 rounded-xl shadow-md text-center stagger-item opacity-0">
+                        <h3 class="text-3xl font-bold text-teal-600">${adminStats.appointmentsCount || 0}</h3>
+                        <p class="text-gray-600 mt-2">Qabullar</p>
+                    </div>
+                    <div class="stat-card bg-white p-6 rounded-xl shadow-md text-center stagger-item opacity-0">
+                        <h3 class="text-3xl font-bold text-teal-600">${adminStats.pendingDoctors ? adminStats.pendingDoctors.length : 0}</h3>
+                        <p class="text-gray-600 mt-2">Tasdiqlanishi kutilayotgan</p>
+                    </div>
+                </div>
+               
+                <div class="top-doctors bg-white p-6 rounded-xl shadow-md">
+                    <h4 class="text-xl font-bold text-gray-800 mb-4 brand-text">Top 10 Shifokorlar</h4>
+                    <div class="doctors-mini-list space-y-3 max-h-64 overflow-y-auto">
+                        ${(adminStats.topDoctors || []).map((doctor, index) => `
+                            <div class="mini-doctor-card flex items-center p-3 bg-teal-50 rounded-lg hover:bg-teal-100 transition-all stagger-item opacity-0">
+                                <img src="${doctor.profile.avatar || '/uploads/avatars/default.png'}"
+                                     alt="Avatar" class="avatar-small w-10 h-10 rounded-full object-cover avatar-hover">
+                                <div class="flex-1 ml-3">
+                                    <strong class="block text-gray-800">${doctor.profile.firstName || ''} ${doctor.profile.lastName || ''}</strong>
+                                    <p class="text-teal-600 text-sm">${doctor.profile.specialization || 'Noma\'lum'} - ⭐ ${(doctor.profile.rating || 0).toFixed(1)}</p>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        function setupTabs() {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Barcha tablarni yopish
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                   
+                    // Tanlangan tabni ochish
+                    btn.classList.add('active');
+                    document.getElementById(btn.dataset.tab).classList.add('active');
+                   
+                    // Ma'lumotlarni yuklash
+                    switch(btn.dataset.tab) {
+                        case 'users':
+                            loadUsers();
+                            break;
+                        case 'doctors':
+                            loadDoctors();
+                            break;
+                        case 'posts':
+                            loadPosts();
+                            break;
+                        case 'appointments':
+                            loadAppointments();
+                            break;
+                        case 'pending':
+                            loadPendingDoctors();
+                            break;
+                    }
+                });
+            });
+        }
+        async function loadUsers(search = '') {
+            try {
+                const tbody = document.getElementById('usersTableBody');
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center py-8"><svg class="animate-spin-slow w-8 h-8 text-teal-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg><td></tr>';
+               
+                const token = localStorage.getItem('token');
+                let url = '/api/admin/users?page=1&limit=50';
+                if (search) {
+                    url += `&search=${encodeURIComponent(search)}`;
+                }
+               
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+               
+                if (response.ok) {
+                    const data = await response.json();
+                    displayUsersTable(data.users || []);
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-red-500">Foydalanuvchilarni yuklashda xatolik</td></tr>';
+                }
+            } catch (error) {
+                console.error('Xatolik:', error);
+                document.getElementById('usersTableBody').innerHTML = '<tr><td colspan="8" class="text-center py-8 text-red-500">Xatolik yuz berdi</td></tr>';
+            }
+        }
+        function displayUsersTable(users) {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '';
+           
+            if (users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-gray-500">Hech qanday foydalanuvchi topilmadi</td></tr>';
+                return;
+            }
+           
+            users.forEach((user, index) => {
+                const row = document.createElement('tr');
+                row.className = `admin-item hover:bg-gray-50 stagger-item opacity-0 ${user.role}`;
+                row.innerHTML = `
+                    <td class="px-3 py-2 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <img src="${user.profile.avatar || '/uploads/avatars/default.png'}" alt="Avatar" class="w-8 h-8 rounded-full mr-2 avatar-hover">
+                            <div>
+                                <div class="text-sm font-medium text-gray-900">${user.profile.firstName || ''} ${user.profile.lastName || ''}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">@${user.username}</td>
+                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">${user.email}</td>
+                    <td class="px-3 py-2 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-teal-100 text-teal-800">${user.role}</span>
+                    </td>
+                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">📍 ${user.profile.location || ''}</td>
+                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">📞 ${user.profile.phone || ''}</td>
+                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">${new Date(user.createdAt).toLocaleDateString('uz-UZ')}</td>
+                    <td class="px-3 py-2 whitespace-nowrap text-sm font-medium">
+                        <div class="flex space-x-2">
+                            <button onclick="editUser('${user._id}')" class="text-blue-600 hover:text-blue-900">Tahrirlash</button>
+                            <button onclick="viewUser('${user._id}')" class="text-teal-600 hover:text-teal-900">Ko'rish</button>
+                            <button onclick="deleteUser('${user._id}')" class="text-red-600 hover:text-red-900">O'chirish</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+                setTimeout(() => row.classList.remove('opacity-0'), index * 50);
+            });
+        }
+        async function searchUsers() {
+            const searchTerm = document.getElementById('searchUsers').value;
+            await loadUsers(searchTerm);
+        }
+        async function loadDoctors(search = '') {
+            try {
+                const tbody = document.getElementById('doctorsTableBody');
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center py-8"><svg class="animate-spin-slow w-8 h-8 text-teal-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg><td></tr>';
+               
+                const token = localStorage.getItem('token');
+                let url = '/api/doctors?limit=50';
+                if (search) {
+                    url += `&search=${encodeURIComponent(search)}`;
+                }
+               
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+               
+                if (response.ok) {
+                    const doctors = await response.json();
+                    displayDoctorsTable(doctors);
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-red-500">Shifokorlarni yuklashda xatolik</td></tr>';
+                }
+            } catch (error) {
+                console.error('Xatolik:', error);
+                document.getElementById('doctorsTableBody').innerHTML = '<tr><td colspan="8" class="text-center py-8 text-red-500">Xatolik yuz berdi</td></tr>';
+            }
+        }
+        function displayDoctorsTable(doctors) {
+            const tbody = document.getElementById('doctorsTableBody');
+            tbody.innerHTML = '';
+           
+            if (doctors.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-gray-500">Hech qanday shifokor topilmadi</td></tr>';
+                return;
+            }
+           
+            doctors.forEach((doctor, index) => {
+                const row = document.createElement('tr');
+                row.className = 'admin-item hover:bg-gray-50 stagger-item opacity-0';
+                row.innerHTML = `
+                    <td class="px-3 py-2 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <img src="${doctor.profile.avatar || '/uploads/avatars/default.png'}" alt="Avatar" class="w-8 h-8 rounded-full mr-2 avatar-hover">
+                            <div>
+                                <div class="text-sm font-medium text-gray-900">${doctor.profile.firstName || ''} ${doctor.profile.lastName || ''}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">@${doctor.username}</td>
+                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">${doctor.profile.specialization || ''}</td>
+                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">📍 ${doctor.profile.location || ''}</td>
+                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">📞 ${doctor.profile.phone || ''}</td>
+                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">⭐ ${(doctor.profile.rating || 0).toFixed(1)}</td>
+                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">✅ ${doctor.profile.successfulCases || 0}</td>
+                    <td class="px-3 py-2 whitespace-nowrap text-sm font-medium">
+                        <div class="flex space-x-2">
+                            <button onclick="editUser('${doctor._id}')" class="text-blue-600 hover:text-blue-900">Tahrirlash</button>
+                            <button onclick="viewUser('${doctor._id}')" class="text-teal-600 hover:text-teal-900">Ko'rish</button>
+                            <button onclick="deleteUser('${doctor._id}')" class="text-red-600 hover:text-red-900">O'chirish</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+                setTimeout(() => row.classList.remove('opacity-0'), index * 50);
+            });
+        }
+        async function searchDoctors() {
+            const searchTerm = document.getElementById('searchDoctors').value;
+            await loadDoctors(searchTerm);
+        }
+        async function loadPosts(search = '') {
+            try {
+                const tbody = document.getElementById('postsTableBody');
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8"><svg class="animate-spin-slow w-8 h-8 text-teal-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg><td></tr>';
+               
+                const token = localStorage.getItem('token');
+                let url = '/api/posts?page=1&limit=50';
+                if (search) {
+                    url += `&search=${encodeURIComponent(search)}`;
+                }
+               
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+               
+                if (response.ok) {
+                    const posts = await response.json();
+                    displayPostsTable(posts);
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-red-500">Postlarni yuklashda xatolik</td></tr>';
+                }
+            } catch (error) {
+                console.error('Xatolik:', error);
+                document.getElementById('postsTableBody').innerHTML = '<tr><td colspan="6" class="text-center py-8 text-red-500">Xatolik yuz berdi</td></tr>';
+            }
+        }
+        function displayPostsTable(posts) {
+            const tbody = document.getElementById('postsTableBody');
+            tbody.innerHTML = '';
+           
+            if (posts.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-gray-500">Hech qanday post topilmadi</td></tr>';
+                return;
+            }
+           
+            posts.forEach((post, index) => {
+                const row = document.createElement('tr');
+                row.className = 'admin-item hover:bg-gray-50 stagger-item opacity-0';
+                row.innerHTML = `
+                    <td class="px-3 py-2">
+                        <div class="text-sm font-medium text-gray-900">${post.title}</div>
+                        <div class="text-sm text-gray-500">${post.content.substring(0, 50)}...</div>
+                    </td>
+                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">${post.author.profile.firstName || ''} ${post.author.profile.lastName || ''} (@${post.author.username})</td>
+                    <td class="px-3 py-2 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-teal-100 text-teal-800">${post.category || 'Umumiy'}</span>
+                    </td>
+                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">${post.likes ? post.likes.length : 0}</td>
+                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">${new Date(post.createdAt).toLocaleDateString('uz-UZ')}</td>
+                    <td class="px-3 py-2 whitespace-nowrap text-sm font-medium">
+                        <div class="flex space-x-2">
+                            <button onclick="viewPost('${post._id}')" class="text-teal-600 hover:text-teal-900">Ko'rish</button>
+                            <button onclick="deletePost('${post._id}')" class="text-red-600 hover:text-red-900">O'chirish</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+                setTimeout(() => row.classList.remove('opacity-0'), index * 50);
+            });
+        }
+        async function searchAdminPosts() {
+            const searchTerm = document.getElementById('searchPosts').value;
+            await loadPosts(searchTerm);
+        }
+        function viewPost(postId) {
+            window.open(`/post?id=${postId}`, '_blank');
+        }
+        async function deletePost(postId) {
+            if (!confirm('Bu postni o\'chirishni tasdiqlaysizmi?')) return;
+           
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/admin/posts/${postId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+               
+                if (response.ok) {
+                    alert('Post muvaffaqiyatli o\'chirildi!');
+                    await loadPosts();
+                }
+            } catch (error) {
+                console.error('Xatolik:', error);
+                alert('O\'chirishda xatolik yuz berdi');
+            }
+        }
+        async function loadAppointments(status = '') {
+            try {
+                const tbody = document.getElementById('appointmentsTableBody');
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8"><svg class="animate-spin-slow w-8 h-8 text-teal-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg><td></tr>';
+               
+                const token = localStorage.getItem('token');
+                let url = '/api/admin/appointments?page=1&limit=50';
+                if (status) {
+                    url += `&status=${status}`;
+                }
+               
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+               
+                if (response.ok) {
+                    const data = await response.json();
+                    displayAppointmentsTable(data.appointments || []);
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-red-500">Qabullarni yuklashda xatolik</td></tr>';
+                }
+            } catch (error) {
+                console.error('Xatolik:', error);
+                document.getElementById('appointmentsTableBody').innerHTML = '<tr><td colspan="7" class="text-center py-8 text-red-500">Xatolik yuz berdi</td></tr>';
+            }
+        }
+        function displayAppointmentsTable(appointments) {
+            const tbody = document.getElementById('appointmentsTableBody');
+            tbody.innerHTML = '';
+           
+            if (appointments.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-gray-500">Hech qanday qabul topilmadi</td></tr>';
+                return;
+            }
+           
+            appointments.forEach((appointment, index) => {
+                const row = document.createElement('tr');
+                row.className = `admin-item hover:bg-gray-50 stagger-item opacity-0 ${appointment.status}`;
+                row.innerHTML = `
+                    <td class="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">${appointment.patient.profile.firstName || ''} ${appointment.patient.profile.lastName || ''} (@${appointment.patient.username})</td>
+                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">${appointment.doctor.profile.firstName || ''} ${appointment.doctor.profile.lastName || ''} (@${appointment.doctor.username})</td>
+                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">${new Date(appointment.date).toLocaleDateString('uz-UZ')} ${appointment.time}</td>
+                    <td class="px-3 py-2 whitespace-nowrap">
+                        <span class="status ${appointment.status} px-2 inline-flex text-xs leading-5 font-semibold rounded-full">${appointment.status}</span>
+                    </td>
+                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">⭐ ${(appointment.rating || 0).toFixed(1)}</td>
+                    <td class="px-3 py-2 text-sm text-gray-500">${appointment.notes || 'Yo\'q'}</td>
+                    <td class="px-3 py-2 whitespace-nowrap text-sm font-medium">
+                        <button onclick="viewAppointment('${appointment._id}')" class="text-teal-600 hover:text-teal-900">Ko'rish</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+                setTimeout(() => row.classList.remove('opacity-0'), index * 50);
+            });
+        }
+        function filterAppointments() {
+            const status = document.getElementById('statusFilter').value;
+            loadAppointments(status);
+        }
+        function viewAppointment(appointmentId) {
+            alert(`Qabul ID: ${appointmentId} - Batafsil ko'rish uchun sahifa yarating`);
+        }
+        async function loadPendingDoctors() {
+            try {
+                const tbody = document.getElementById('pendingTableBody');
+               
+                if (!adminStats || !adminStats.pendingDoctors || adminStats.pendingDoctors.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-gray-500">Tasdiqlanishi kutilayotgan shifokorlar yo\'q</td></tr>';
+                    return;
+                }
+               
+                tbody.innerHTML = '';
+               
+                adminStats.pendingDoctors.forEach((doctor, index) => {
+                    const documentsList = (doctor.profile.documents || []).map(doc => `
+                        <a href="${doc.filePath}" target="_blank" class="text-teal-600 hover:underline text-xs block">${doc.name}</a>
+                    `).join('') || 'Hujjatlar yuklanmagan';
+                   
+                    const row = document.createElement('tr');
+                    row.className = 'admin-item bg-white p-3 rounded-lg shadow-md flex justify-between items-start pending stagger-item opacity-0';
+                    row.innerHTML = `
+                        <td class="px-3 py-2 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <img src="${doctor.profile.avatar || '/uploads/avatars/default.png'}" alt="Avatar" class="w-8 h-8 rounded-full mr-2 avatar-hover">
+                                <div>
+                                    <div class="text-sm font-medium text-gray-900">${doctor.profile.firstName || ''} ${doctor.profile.lastName || ''}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">@${doctor.username}</td>
+                        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">${doctor.profile.specialization || ''}</td>
+                        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">📍 ${doctor.profile.location || ''}</td>
+                        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">📞 ${doctor.profile.phone || ''}</td>
+                        <td class="px-3 py-2 text-sm text-gray-500 max-w-xs">${documentsList}</td>
+                        <td class="px-3 py-2 whitespace-nowrap text-sm font-medium">
+                            <div class="flex space-x-2">
+                                <button onclick="verifyDoctor('${doctor._id}')" class="text-green-600 hover:text-green-900">Tasdiqlash</button>
+                                <button onclick="rejectDoctor('${doctor._id}')" class="text-red-600 hover:text-red-900">Rad etish</button>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                    setTimeout(() => row.classList.remove('opacity-0'), index * 50);
+                });
+            } catch (error) {
+                console.error('Xatolik:', error);
+            }
+        }
+        async function verifyDoctor(doctorId) {
+            if (!confirm('Bu shifokorni tasdiqlaysizmi?')) return;
+           
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/doctors/${doctorId}/verify`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+               
+                if (response.ok) {
+                    alert('Shifokor muvaffaqiyatli tasdiqlandi!');
+                    await loadAdminStats();
+                    await loadPendingDoctors();
+                } else {
+                    alert('Tasdiqlashda xatolik yuz berdi');
+                }
+            } catch (error) {
+                console.error('Xatolik:', error);
+                alert('Tasdiqlashda xatolik yuz berdi');
+            }
+        }
+        async function rejectDoctor(doctorId) {
+            if (!confirm('Bu shifokorni rad etasizmi?')) return;
+           
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/admin/users/${doctorId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+               
+                if (response.ok) {
+                    alert('Shifokor rad etildi!');
+                    await loadAdminStats();
+                    await loadPendingDoctors();
+                } else {
+                    alert('Rad etishda xatolik yuz berdi');
+                }
+            } catch (error) {
+                console.error('Xatolik:', error);
+                alert('Rad etishda xatolik yuz berdi');
+            }
+        }
+        async function deleteUser(userId) {
+            if (!confirm('Bu foydalanuvchini o\'chirishni tasdiqlaysizmi?')) return;
+           
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/admin/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+               
+                if (response.ok) {
+                    alert('Foydalanuvchi muvaffaqiyatli o\'chirildi!');
+                    await loadUsers();
+                } else {
+                    alert('O\'chirishda xatolik yuz berdi');
+                }
+            } catch (error) {
+                console.error('Xatolik:', error);
+                alert('O\'chirishda xatolik yuz berdi');
+            }
+        }
+        function viewUser(userId) {
+            window.open(`/profile?id=${userId}`, '_blank');
+        }
+        // Edit functions
+        async function editUser(userId) {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/admin/users/${userId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+               
+                if (response.ok) {
+                    const user = await response.json();
+                    document.getElementById('editId').value = user._id;
+                    document.getElementById('editFirstName').value = user.profile.firstName || '';
+                    document.getElementById('editLastName').value = user.profile.lastName || '';
+                    document.getElementById('editEmail').value = user.email;
+                    document.getElementById('editRole').value = user.role;
+                    document.getElementById('modalTitle').textContent = `${user.profile.firstName || ''} ${user.profile.lastName || ''} ni tahrirlash`;
+                    openModal();
+                }
+            } catch (error) {
+                console.error('Xatolik:', error);
+                alert('Ma\'lumotlarni yuklashda xatolik');
+            }
+        }
+        function setupEditForm() {
+            const form = document.getElementById('editForm');
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const userId = document.getElementById('editId').value;
+                const formData = {
+                    profile: {
+                        firstName: document.getElementById('editFirstName').value,
+                        lastName: document.getElementById('editLastName').value
+                    },
+                    email: document.getElementById('editEmail').value,
+                    role: document.getElementById('editRole').value
+                };
+               
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch(`/api/admin/users/${userId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(formData)
+                    });
+                   
+                    if (response.ok) {
+                        alert('Foydalanuvchi muvaffaqiyatli yangilandi!');
+                        closeModal();
+                        loadUsers(); // Refresh list
+                    } else {
+                        alert('Yangilashda xatolik yuz berdi');
+                    }
+                } catch (error) {
+                    console.error('Xatolik:', error);
+                    alert('Yangilashda xatolik yuz berdi');
+                }
+            });
+        }
+        function openModal() {
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+        function closeModal() {
+            document.getElementById('editModal').classList.add('hidden');
+            document.getElementById('editForm').reset();
+        }
+        // Chiqish
+        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/';
+        });
+        document.getElementById('mobileLogout').addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/';
+        });
+        // Modal close on overlay click
+        document.getElementById('editModal').addEventListener('click', (e) => {
+            if (e.target.id === 'editModal') closeModal();
+        });
+    </script>
+</body>
+</html>

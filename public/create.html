@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post Yaratish - Hallallaymm Tibbiyot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'teal-gold': {
+                            50: '#ecfdf5',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e'
+                        },
+                        'gold-accent': '#f59e0b'
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.6s ease-out forwards',
+                        'stagger-fade': 'staggerFade 0.3s ease-out forwards',
+                        'pulse-slow': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'spin-slow': 'spin 1s linear infinite',
+                        'slide-in-right': 'slideInRight 0.5s ease-out forwards'
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        },
+                        staggerFade: {
+                            '0%': { opacity: '0', transform: 'scale(0.95)' },
+                            '100%': { opacity: '1', transform: 'scale(1)' }
+                        },
+                        slideInRight: {
+                            '0%': { transform: 'translateX(100%)', opacity: '0' },
+                            '100%': { transform: 'translateX(0)', opacity: '1' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .stagger-item:nth-child(1) { animation-delay: 0.1s; }
+        .stagger-item:nth-child(2) { animation-delay: 0.2s; }
+        .stagger-item:nth-child(3) { animation-delay: 0.3s; }
+        .stagger-item:nth-child(4) { animation-delay: 0.4s; }
+        .brand-text {
+            background: linear-gradient(135deg, #14b8a6, #0d9488);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 10px rgba(20, 184, 166, 0.5);
+        }
+        .gold-glow {
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+        }
+        .field-focus {
+            transform: scale(1.02);
+            box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.2);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-teal-gold-50 to-gray-50">
+    <!-- Header -->
+    <header class="bg-teal-600 text-white shadow-lg fixed w-full top-0 z-50 transition-all duration-300">
+        <nav class="flex justify-between items-center p-4 max-w-7xl mx-auto">
+            <div class="nav-brand flex items-center gap-2">
+                <div class="w-8 h-8 bg-black rounded-full flex items-center justify-center gold-glow">
+                    <span class="text-xs font-bold text-teal-gold-500">H</span>
+                </div>
+                <h2 class="text-xl md:text-2xl font-bold brand-text">Hallallaymm Tibbiyot</h2>
+            </div>
+            <div class="nav-links hidden md:flex space-x-6">
+                <a href="/index" class="hover:text-teal-200 transition-colors px-2 py-1 rounded">Asosiy</a>
+                <a href="/doctor" class="hover:text-teal-200 transition-colors px-2 py-1 rounded">Shifokorlar</a>
+                <a href="/chatbot" class="hover:text-teal-200 transition-colors px-2 py-1 rounded">Chatbot</a>
+                <a href="/create" class="hover:text-teal-200 transition-colors px-2 py-1 rounded bg-teal-700">Post yaratish</a>
+                <a href="/profile" class="hover:text-teal-200 transition-colors px-2 py-1 rounded">Profil</a>
+                <a href="#" id="logoutBtn" class="bg-gold-accent hover:bg-amber-500 px-4 py-2 rounded transition-colors">Chiqish</a>
+            </div>
+            <!-- Mobile menu button -->
+            <button class="md:hidden text-white" id="mobileMenuBtn">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </nav>
+        <!-- Mobile menu -->
+        <div id="mobileMenu" class="md:hidden hidden bg-teal-700 px-4 py-2 space-y-2">
+            <a href="/index" class="block hover:bg-teal-600 px-3 py-2 rounded">Asosiy</a>
+            <a href="/doctor" class="block hover:bg-teal-600 px-3 py-2 rounded">Shifokorlar</a>
+            <a href="/chatbot" class="block hover:bg-teal-600 px-3 py-2 rounded">Chatbot</a>
+            <a href="/create" class="block hover:bg-teal-600 px-3 py-2 rounded bg-teal-500">Post yaratish</a>
+            <a href="/profile" class="block hover:bg-teal-600 px-3 py-2 rounded">Profil</a>
+            <a href="#" id="mobileLogout" class="block bg-gold-accent hover:bg-amber-500 px-3 py-2 rounded text-center">Chiqish</a>
+        </div>
+    </header>
+
+    <!-- Spacer for fixed header -->
+    <div class="h-16 md:h-20"></div>
+
+    <main class="container mx-auto px-4 py-8 max-w-2xl">
+        <div class="create-post-container bg-white rounded-2xl shadow-xl p-6 md:p-8 gold-glow animate-fade-in-up">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl md:text-4xl font-bold brand-text mb-2">Yangi Post Yaratish</h1>
+                <p class="text-teal-600 font-semibold">Sog'liq haqida foydali ma'lumotlar bilan bo'lishing</p>
+            </div>
+            
+            <form id="createPostForm" enctype="multipart/form-data" class="space-y-6">
+                <!-- Sarlavha -->
+                <div class="form-group stagger-item animate-stagger-fade opacity-0">
+                    <label for="postTitle" class="block text-sm font-semibold text-gray-700 mb-2">Sarlavha</label>
+                    <input type="text" id="postTitle" name="title" required 
+                           placeholder="Post sarlavhasini kiriting..." 
+                           class="w-full p-4 border border-teal-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all hover:gold-glow text-lg">
+                </div>
+                
+                <!-- Mazmun -->
+                <div class="form-group stagger-item animate-stagger-fade opacity-0" style="animation-delay: 0.1s;">
+                    <label for="postContent" class="block text-sm font-semibold text-gray-700 mb-2">Mazmuni</label>
+                    <textarea id="postContent" name="content" rows="8" required
+                              placeholder="Post mazmunini kiriting... Tibbiy maslahatlar, tajribalar yoki savollar bilan bo'lishing" 
+                              class="w-full p-4 border border-teal-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all hover:gold-glow resize-none"></textarea>
+                </div>
+                
+                <!-- Kategoriya -->
+                <div class="form-group stagger-item animate-stagger-fade opacity-0" style="animation-delay: 0.2s;">
+                    <label for="postCategory" class="block text-sm font-semibold text-gray-700 mb-2">Kategoriya</label>
+                    <select id="postCategory" name="category" required
+                            class="w-full p-4 border border-teal-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all hover:gold-glow">
+                        <option value="">Kategoriyani tanlang</option>
+                        <option value="sog'liq">Sog'liq</option>
+                        <option value="dori">Dori</option>
+                        <option value="kasallik">Kasallik</option>
+                        <option value="tavsiya">Tavsiya</option>
+                        <option value="tajriba">Tajriba</option>
+                        <option value="yangilik">Yangilik</option>
+                    </select>
+                </div>
+                
+                <!-- Rasm -->
+                <div class="form-group stagger-item animate-stagger-fade opacity-0" style="animation-delay: 0.3s;">
+                    <label for="postImage" class="block text-sm font-semibold text-gray-700 mb-2">Rasm (ixtiyoriy)</label>
+                    <input type="file" id="postImage" name="postImage" accept="image/*" 
+                           class="w-full p-4 border border-teal-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all hover:gold-glow file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100">
+                    <small class="text-gray-500 text-sm block mt-1">Postga rasm qo'shishingiz mumkin (JPG, PNG, maks. 5MB)</small>
+                </div>
+                
+                <!-- Tugmalar -->
+                <div class="form-actions flex flex-col sm:flex-row gap-4 pt-4 border-t border-teal-100 stagger-item animate-stagger-fade opacity-0" style="animation-delay: 0.4s;">
+                    <button type="submit" class="flex-1 bg-teal-600 hover:bg-teal-700 text-white py-4 rounded-xl font-semibold text-lg transition-all animate-pulse-slow">
+                        Postni Joylash
+                    </button>
+                    <button type="button" onclick="window.history.back()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-4 rounded-xl font-semibold text-lg transition-all">
+                        Bekor qilish
+                    </button>
+                </div>
+            </form>
+            
+            <!-- Qoidalar -->
+            <div class="post-guidelines mt-8 p-6 bg-gradient-to-r from-teal-50 to-teal-100 rounded-2xl border border-teal-200">
+                <h3 class="text-xl font-bold text-gray-800 mb-4 brand-text">Post yaratish qoidalari:</h3>
+                <ul class="space-y-2 text-sm text-gray-700">
+                    <li class="flex items-start gap-2"><span class="text-green-600 font-semibold mt-1">✅</span>Tibbiy ma'lumotlar aniq va ishonchli manbalardan olingan bo'lishi kerak</li>
+                    <li class="flex items-start gap-2"><span class="text-green-600 font-semibold mt-1">✅</span>Boshqalarga foydali bo'ladigan ma'lumotlar bilan bo'lishing</li>
+                    <li class="flex items-start gap-2"><span class="text-green-600 font-semibold mt-1">✅</span>Maxfiylik qoidalariga rioya qiling</li>
+                    <li class="flex items-start gap-2"><span class="text-red-600 font-semibold mt-1">❌</span>Noto'g'ri yoki chalg'ituvchi ma'lumotlarni tarqatmang</li>
+                    <li class="flex items-start gap-2"><span class="text-red-600 font-semibold mt-1">❌</span>Reklama yoki tijorat maqsadlarida foydalanmang</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentUser = null;
+
+        // Mobile menu setup
+        function setupMobileMenu() {
+            const btn = document.getElementById('mobileMenuBtn');
+            const menu = document.getElementById('mobileMenu');
+            btn.addEventListener('click', () => {
+                menu.classList.toggle('hidden');
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setupMobileMenu();
+            const token = localStorage.getItem('token');
+            const userData = localStorage.getItem('user');
+            
+            if (!token || !userData) {
+                window.location.href = '/';
+                return;
+            }
+            
+            currentUser = JSON.parse(userData);
+
+            // Stagger animation boshlash
+            setTimeout(() => {
+                document.querySelectorAll('.stagger-item').forEach((item, index) => {
+                    item.classList.remove('opacity-0');
+                });
+            }, 100);
+        });
+
+        // Post yaratish
+        document.getElementById('createPostForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/posts', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const post = await response.json();
+                    alert('Post muvaffaqiyatli yaratildi!');
+                    window.location.href = '/index';
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.message);
+                }
+            } catch (error) {
+                console.error('Xatolik:', error);
+                alert('Post yaratishda xatolik: ' + error.message);
+            }
+        });
+
+        // Focus animatsiyalari
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('input, textarea, select').forEach(input => {
+                input.addEventListener('focus', () => {
+                    input.classList.add('field-focus');
+                });
+                input.addEventListener('blur', () => {
+                    input.classList.remove('field-focus');
+                });
+            });
+        });
+
+        // Chiqish
+        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/';
+        });
+        document.getElementById('mobileLogout').addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/';
+        });
+    </script>
+</body>
+</html>

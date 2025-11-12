@@ -136,6 +136,7 @@
     </div>
 
     <script>
+        const API_BASE = 'https://med-u6e4.onrender.com';
         let currentUser = null;
         let posts = [];
         let currentPage = 1;
@@ -150,7 +151,7 @@
             const userData = localStorage.getItem('user');
             
             if (!token || !userData) {
-                window.location.href = '/';
+                window.location.href = 'register-login.html';
                 return;
             }
             
@@ -158,6 +159,7 @@
             await loadPosts(1, '', '');
             setupInfiniteScroll();
             setupMobileMenu();
+            setupModalEvents(); // Modal eventlarini o'rnatish
         });
 
         // Infinite Scroll o'rnatish
@@ -180,7 +182,7 @@
 
             try {
                 const token = localStorage.getItem('token');
-                let url = `/api/posts?page=${page}&limit=6&search=${encodeURIComponent(search)}&category=${encodeURIComponent(category)}`;
+                let url = `${API_BASE}/api/posts?page=${page}&limit=6&search=${encodeURIComponent(search)}&category=${encodeURIComponent(category)}`;
                 
                 const response = await fetch(url, {
                     headers: {
@@ -201,11 +203,19 @@
                         displayPostsWithAnimation(newPosts);
                     }
                 } else {
+                    // Agar 401 bo'lsa, token muddati tugagan, chiqish
+                    if (response.status === 401) {
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('user');
+                        window.location.href = 'register-login.html';
+                        return;
+                    }
                     throw new Error('Postlarni yuklab bo\'lmadi');
                 }
             } catch (error) {
                 console.error('Xatolik:', error);
-                alert('Postlarni yuklab bo\'lmadi');
+                // Xatolikni konsolda ko'rsatish uchun alert o'rniga console.log ishlatish, sahifa yangilanmasin
+                console.log('Postlarni yuklab bo\'lmadi: ', error.message);
                 hasMore = false;
             } finally {
                 isLoading = false;
@@ -289,7 +299,7 @@
         async function toggleLike(postId) {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`https://med-u6e4.onrender.com/api/posts/${postId}/like`, {
+                const response = await fetch(`${API_BASE}/api/posts/${postId}/like`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -300,6 +310,10 @@
                 if (response.ok) {
                     const result = await response.json();
                     await loadPosts(currentPage, searchTerm, categoryFilter, currentPage > 1); // Yangilash
+                } else if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = 'register-login.html';
                 }
             } catch (error) {
                 console.error('Xatolik:', error);
@@ -378,6 +392,31 @@
             
             modal.classList.remove('hidden');
             document.body.style.overflow = 'hidden'; // Scroll bloklash
+            // Modal ochilganda close event qo'shish
+            const closeBtn = details.querySelector('.close');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', closeModal);
+            }
+        }
+
+        // Modal yopish
+        function closeModal() {
+            const modal = document.getElementById('postModal');
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Dokument bo'ylab modal tashqarisini bosganda yopish
+        document.addEventListener('click', (e) => {
+            const modal = document.getElementById('postModal');
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        // Modal eventlarini o'rnatish (umumiy)
+        function setupModalEvents() {
+            // Bu yerda qo'shimcha eventlar bo'lishi mumkin
         }
 
         // Kommentariya qo'shish
@@ -387,7 +426,7 @@
 
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`https://med-u6e4.onrender.com/api/posts/${postId}/comment`, {
+                const response = await fetch(`${API_BASE}/api/posts/${postId}/comment`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -400,6 +439,10 @@
                     document.getElementById('commentText').value = '';
                     await loadPosts(currentPage, searchTerm, categoryFilter, currentPage > 1);
                     showComments(postId); // Yangilash
+                } else if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = 'register-login.html';
                 }
             } catch (error) {
                 console.error('Xatolik:', error);
@@ -419,7 +462,7 @@
 
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`https://med-u6e4.onrender.com/api/posts/${postId}/comment/${commentId}/reply`, {
+                const response = await fetch(`${API_BASE}/api/posts/${postId}/comment/${commentId}/reply`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -432,6 +475,10 @@
                     document.getElementById(`replyText-${commentId}`).value = '';
                     await loadPosts(currentPage, searchTerm, categoryFilter, currentPage > 1);
                     showComments(postId); // Yangilash
+                } else if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = 'register-login.html';
                 }
             } catch (error) {
                 console.error('Xatolik:', error);
@@ -457,8 +504,11 @@
                     url: shareUrl
                 });
             } else {
-                navigator.clipboard.writeText(shareUrl);
-                alert('Havola nusxalandi!');
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    alert('Havola nusxalandi!');
+                }).catch(() => {
+                    alert('Havola nusxalanmadi!');
+                });
             }
         }
 
@@ -469,31 +519,20 @@
             loadPosts(1, searchTerm, categoryFilter, false);
         }
 
-        // Modal yopish
-        document.addEventListener('click', (e) => {
-            const modal = document.getElementById('postModal');
-            if (e.target === modal) {
-                modal.classList.add('hidden');
-                document.body.style.overflow = 'auto';
-            }
-        });
-        document.querySelector('.close').addEventListener('click', () => {
-            document.getElementById('postModal').classList.add('hidden');
-            document.body.style.overflow = 'auto';
-        });
-
         // Chiqish
-        document.getElementById('logoutBtn').addEventListener('click', (e) => {
-            e.preventDefault();
+        function logout() {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            window.location.href = '/';
+            window.location.href = 'register-login.html';
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            logout();
         });
         document.getElementById('mobileLogout').addEventListener('click', (e) => {
             e.preventDefault();
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = '/';
+            logout();
         });
 
         // Mobile menu
@@ -509,14 +548,14 @@
         const urlParams = new URLSearchParams(window.location.search);
         const postId = urlParams.get('post');
         if (postId) {
-            // Postni topish va modalni ochish
-            setTimeout(async () => {
+            // Postni topish va modalni ochish (await bilan)
+            (async () => {
                 await loadPosts(1, '', ''); // Dastlab yuklash
                 const post = posts.find(p => p._id === postId);
                 if (post) {
                     showComments(postId);
                 }
-            }, 1500);
+            })();
         }
     </script>
 </body>

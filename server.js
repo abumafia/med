@@ -604,7 +604,7 @@ app.get('/api/appointments/:id', authenticateToken, async (req, res) => {
     }
     
     // Check access: owner or patient/doctor
-    if (appointment.patient.toString() !== req.user.userId && appointment.doctor.toString() !== req.user.userId && req.user.role !== 'admin') {
+    if (appointment.patient._id.toString() !== req.user.userId && appointment.doctor._id.toString() !== req.user.userId && req.user.role !== 'admin') {
       return res.status(403).json({ message: 'Ruxsat yo\'q' });
     }
     

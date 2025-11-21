@@ -524,6 +524,44 @@ app.post('/api/doctors/:id/verify', authenticateToken, async (req, res) => {
 });
 
 // Appointments routes (ikkita dublikat birlashtirildi: doctorId va status query bilan)
+app.post('/api/appointments', authenticateToken, async (req, res) => {
+  try {
+    const { doctor, date, time, notes } = req.body;
+    
+    if (!doctor || !date || !time) {
+      return res.status(400).json({ message: 'Doctor, sana va vaqt majburiy' });
+    }
+    
+    // Doctor mavjudligini tekshirish
+    const doctorUser = await User.findById(doctor);
+    if (!doctorUser || doctorUser.role !== 'doctor' || !doctorUser.profile.isVerified) {
+      return res.status(400).json({ message: 'Noto\'g\'ri shifokor ID yoki tasdiqlanmagan shifokor' });
+    }
+    
+    // Sana vaqtni parse qilish
+    const appointmentDate = new Date(date);
+    appointmentDate.setHours(parseInt(time.split(':')[0]), parseInt(time.split(':')[1]));
+    
+    const appointment = new Appointment({
+      patient: req.user.userId,
+      doctor: doctor,
+      date: appointmentDate,
+      time,
+      notes,
+      status: 'pending'
+    });
+    
+    await appointment.save();
+    await appointment.populate('patient', 'username profile.firstName profile.lastName');
+    await appointment.populate('doctor', 'username profile.firstName profile.lastName profile.specialization');
+    
+    res.status(201).json(appointment);
+  } catch (error) {
+    console.error('Appointment creation error:', error);
+    res.status(500).json({ message: 'Server xatosi', error: error.message });
+  }
+});
+
 app.get('/api/appointments', authenticateToken, async (req, res) => {
   try {
     const { doctorId, status } = req.query;
@@ -603,6 +641,9 @@ app.put('/api/appointments/:id', authenticateToken, async (req, res) => {
       }
       await doctor.save();
     }
+    
+    await appointment.populate('patient', 'username profile.firstName profile.lastName');
+    await appointment.populate('doctor', 'username profile.firstName profile.lastName profile.specialization');
     
     res.json(appointment);
   } catch (error) {

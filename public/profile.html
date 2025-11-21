@@ -509,7 +509,7 @@
                 document.body.style.overflow = 'hidden';
             }).catch(error => {
                 console.error('Xatolik:', error);
-                alert('Qabul ma\'lumotlarini yuklab bo\'lmadi');
+                alert('Qabul ma\'lumotlarini yuklab bo\'lmadi: ' + error.message);
             });
         }
 
@@ -528,8 +528,10 @@
             });
             if (response.ok) {
                 return await response.json();
+            } else {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || 'Failed to fetch');
             }
-            throw new Error('Failed to fetch');
         }
 
         async function confirmAction() {
@@ -550,11 +552,12 @@
                     loadPendingAppointments();
                     alert(currentAction === 'accept' ? 'Qabul qilindi' : 'Rad etildi');
                 } else {
-                    throw new Error('Update failed');
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || 'Update failed');
                 }
             } catch (error) {
                 console.error('Xatolik:', error);
-                alert('Amalni bajarib bo\'lmadi');
+                alert('Amalni bajarib bo\'lmadi: ' + error.message);
             }
         }
 
@@ -567,9 +570,13 @@
                 if (response.ok) {
                     const appointments = await response.json();
                     displayPendingAppointments(appointments);
+                } else {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || 'Failed to load');
                 }
             } catch (error) {
                 console.error('Xatolik:', error);
+                alert('Pending qabulni yuklab bo\'lmadi: ' + error.message);
             }
         }
 
@@ -853,10 +860,13 @@
                     alert(isSatisfied ? 'Rahmat! Qoniqdingiz!' : 'Kechirasiz, yaxshilaymiz!');
                     await loadProfile(profileUser._id);  // Reload profile to update stats
                     document.getElementById('ratingFeedback').classList.add('hidden');
+                } else {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || 'Rating submit failed');
                 }
             } catch (error) {
                 console.error('Reyting berishda xatolik:', error);
-                alert('Reyting berishda xatolik yuz berdi');
+                alert('Reyting berishda xatolik yuz berdi: ' + error.message);
             }
         }
 
@@ -903,10 +913,13 @@
                     const result = await response.json();
                     setupActionButtons(); // Tugmalarni yangilash
                     document.getElementById('followersCount').textContent = result.followersCount;
+                } else {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || 'Follow toggle failed');
                 }
             } catch (error) {
                 console.error('Xatolik:', error);
-                alert('Obuna holatini o\'zgartirib bo\'lmadi');
+                alert('Obuna holatini o\'zgartirib bo\'lmadi: ' + error.message);
             }
         }
 
@@ -925,10 +938,13 @@
                 if (response.ok) {
                     const chat = await response.json();
                     openChatModal(chat);
+                } else {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || 'Chat start failed');
                 }
             } catch (error) {
                 console.error('Xatolik:', error);
-                alert('Chatni boshlab bo\'lmadi');
+                alert('Chatni boshlab bo\'lmadi: ' + error.message);
             }
         }
 
@@ -943,6 +959,9 @@
                     // Faqat messages.length > 0 bo'lgan chatlarni filter qil
                     const activeChats = chats.filter(chat => chat.messages && chat.messages.length > 0);
                     displayChats(activeChats);
+                } else {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || 'Chats load failed');
                 }
             } catch (error) {
                 console.error('Chatlarni yuklashda xatolik:', error);
@@ -1003,10 +1022,13 @@
                     input.value = '';
                     socket.emit('send-message', { chatId: currentChatId, senderId: currentUser.id, text });
                     if (isOwnProfile) loadChats();  // Reload after send
+                } else {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || 'Message send failed');
                 }
             } catch (error) {
                 console.error('Xatolik:', error);
-                alert('Xabarni yuborib bo\'lmadi');
+                alert('Xabarni yuborib bo\'lmadi: ' + error.message);
             }
         }
 
@@ -1062,11 +1084,12 @@
                     closeEditModal();
                     alert('Profil muvaffaqiyatli yangilandi');
                 } else {
-                    throw new Error('Profilni yangilab bo\'lmadi');
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || 'Profilni yangilab bo\'lmadi');
                 }
             } catch (error) {
                 console.error('Xatolik:', error);
-                alert('Profilni yangilab bo\'lmadi');
+                alert('Profilni yangilab bo\'lmadi: ' + error.message);
             }
         });
 
@@ -1083,6 +1106,9 @@
                 if (response.ok) {
                     const posts = await response.json();
                     displayUserPosts(posts);
+                } else {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || 'Posts load failed');
                 }
             } catch (error) {
                 console.error('Xatolik:', error);

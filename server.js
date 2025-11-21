@@ -269,6 +269,10 @@ app.get('/api/posts', async (req, res) => {
     if (author) {
       postsQuery = postsQuery.populate('comments.user', 'username profile.avatar profile.firstName profile.lastName')
                             .populate('comments.replies.user', 'username profile.avatar profile.firstName profile.lastName');
+    } else {
+      // Umumiy postlar uchun ham comments ni populate qilish, chunki index.html da kerak
+      postsQuery = postsQuery.populate('comments.user', 'username profile.avatar profile.firstName profile.lastName')
+                            .populate('comments.replies.user', 'username profile.avatar profile.firstName profile.lastName');
     }
     
     const posts = await postsQuery;
@@ -297,6 +301,8 @@ app.post('/api/posts', authenticateToken, uploadFields, async (req, res) => {
     const post = new Post(postData);
     await post.save();
     await post.populate('author', 'username profile.avatar profile.firstName profile.lastName');
+    await post.populate('comments.user', 'username profile.avatar profile.firstName profile.lastName');
+    await post.populate('comments.replies.user', 'username profile.avatar profile.firstName profile.lastName');
     
     res.status(201).json(post);
   } catch (error) {
@@ -322,6 +328,7 @@ app.post('/api/posts/:id/like', authenticateToken, async (req, res) => {
     }
     
     await post.save();
+    await post.populate('author', 'username profile.avatar profile.firstName profile.lastName');
     res.json({ likes: post.likes.length, isLiked: likeIndex === -1 });
   } catch (error) {
     res.status(500).json({ message: 'Server xatosi', error: error.message });
@@ -516,6 +523,7 @@ app.post('/api/doctors/:id/verify', authenticateToken, async (req, res) => {
   }
 });
 
+// Appointments routes (ikkita dublikat birlashtirildi: doctorId va status query bilan)
 app.get('/api/appointments', authenticateToken, async (req, res) => {
   try {
     const { doctorId, status } = req.query;
@@ -534,27 +542,6 @@ app.get('/api/appointments', authenticateToken, async (req, res) => {
     // User doctor appointments ni olish uchun
     if (doctorId && req.user.role === 'user') {
       query.doctor = doctorId;
-    }
-    
-    const appointments = await Appointment.find(query)
-      .populate('patient', 'username profile.avatar profile.firstName profile.lastName')
-      .populate('doctor', 'username profile.avatar profile.firstName profile.lastName')
-      .sort({ date: 1 });
-    
-    res.json(appointments);
-  } catch (error) {
-    res.status(500).json({ message: 'Server xatosi', error: error.message });
-  }
-});
-
-app.get('/api/appointments', authenticateToken, async (req, res) => {
-  try {
-    let query = {};
-    
-    if (req.user.role === 'doctor') {
-      query.doctor = req.user.userId;
-    } else if (req.user.role === 'user') {
-      query.patient = req.user.userId;
     }
     
     const appointments = await Appointment.find(query)

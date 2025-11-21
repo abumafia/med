@@ -262,6 +262,22 @@
                 </div>
             </div>
 
+            <!-- Qabulga yozilganlar (faqat o'z profil uchun, doctor uchun, toggle bilan) -->
+            <div id="appointmentsToggle" class="hidden mb-8">
+                <button id="toggleAppointmentsBtn" onclick="toggleAppointments()" class="luxury-card inline-flex items-center gap-2 bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white px-8 py-4 rounded-2xl font-semibold transition-all shadow-lg hover:shadow-xl">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4z"></path>
+                    </svg>
+                    Qabulga yozilganlarni ko'rsatish
+                </button>
+            </div>
+            <div id="appointmentsSection" class="appointments-section hidden luxury-card rounded-3xl shadow-2xl p-8 mb-8 gold-glow">
+                <h3 class="text-3xl font-bold text-gray-800 mb-8 brand-text">Qabulga yozilganlar</h3>
+                <div id="appointmentsList" class="space-y-4 max-h-96 overflow-y-auto">
+                    <!-- Qabul ro'yxati -->
+                </div>
+            </div>
+
             <!-- Foydalanuvchi postlari -->
             <div class="user-posts luxury-card rounded-3xl shadow-2xl p-8 gold-glow">
                 <h3 class="text-3xl font-bold text-gray-800 mb-8 brand-text">Postlar</h3>
@@ -341,6 +357,23 @@
         </div>
     </div>
 
+    <!-- Appointment Action Modal -->
+    <div id="appointmentActionModal" class="modal fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden p-4 backdrop-blur-sm">
+        <div class="modal-content luxury-card rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative gold-glow modal-enter">
+            <span class="close absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-3xl cursor-pointer z-10 font-bold transition-colors" onclick="closeAppointmentActionModal()">&times;</span>
+            <div class="p-8">
+                <h3 id="actionModalTitle" class="text-3xl font-bold text-gray-800 mb-8 brand-text text-center"></h3>
+                <div id="actionModalContent" class="space-y-6">
+                    <!-- Content will be inserted here -->
+                </div>
+                <div class="flex gap-4 mt-8">
+                    <button id="confirmActionBtn" class="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-4 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl">Tasdiqlash</button>
+                    <button onclick="closeAppointmentActionModal()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-4 rounded-xl font-semibold transition-all">Bekor qilish</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const API_BASE = 'https://med-uz.onrender.com';
         let currentUser = null;
@@ -352,6 +385,9 @@
         let hasRated = false;
         let lastAppointmentId = null;
         let chatsVisible = false;
+        let appointmentsVisible = false;
+        let currentAppointmentId = null;
+        let currentAction = null;
         const DEFAULT_AVATAR = 'https://via.placeholder.com/150x150/14b8a6/ffffff?text=U';
 
         // Socket connection
@@ -390,6 +426,20 @@
             }
         }
 
+        // Appointments toggle
+        function toggleAppointments() {
+            const section = document.getElementById('appointmentsSection');
+            const btn = document.getElementById('toggleAppointmentsBtn');
+            appointmentsVisible = !appointmentsVisible;
+            section.classList.toggle('hidden');
+            btn.innerHTML = appointmentsVisible ? 
+                '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4z"></path></svg> Qabulga yozilganlarni yashirish' : 
+                '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4z"></path></svg> Qabulga yozilganlarni ko\'rsatish';
+            if (appointmentsVisible) {
+                loadPendingAppointments();
+            }
+        }
+
         // Edit modal functions
         function openEditModal() {
             const modal = document.getElementById('editModal');
@@ -421,6 +471,138 @@
             const modal = document.getElementById('editModal');
             modal.classList.add('hidden');
             document.body.style.overflow = 'auto';
+        }
+
+        // Appointment action modal functions
+        function openActionModal(appointmentId, action) {
+            currentAppointmentId = appointmentId;
+            currentAction = action;
+            const title = action === 'accept' ? 'Qabul qilishni tasdiqlang' : 'Rad etishni tasdiqlang';
+            document.getElementById('actionModalTitle').textContent = title;
+            fetchAppointmentDetails(appointmentId).then(details => {
+                document.getElementById('actionModalContent').innerHTML = `
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-semibold text-gray-700">Bemor:</h4>
+                            <p class="text-gray-900">${details.patient.profile.firstName} ${details.patient.profile.lastName}</p>
+                            <p class="text-sm text-gray-600">@${details.patient.username}</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-700">Sana va vaqt:</h4>
+                            <p class="text-gray-900">${new Date(details.date).toLocaleString('uz-UZ')}</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-700">Izoh:</h4>
+                            <p class="text-gray-900">${details.notes || 'Izoh yo\'q'}</p>
+                        </div>
+                    </div>
+                `;
+                const confirmBtn = document.getElementById('confirmActionBtn');
+                if (action === 'accept') {
+                    confirmBtn.className = 'flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-4 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl';
+                    confirmBtn.textContent = 'Qabul qilish';
+                } else {
+                    confirmBtn.className = 'flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-4 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl';
+                    confirmBtn.textContent = 'Rad etish';
+                }
+                document.getElementById('appointmentActionModal').classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }).catch(error => {
+                console.error('Xatolik:', error);
+                alert('Qabul ma\'lumotlarini yuklab bo\'lmadi');
+            });
+        }
+
+        function closeAppointmentActionModal() {
+            const modal = document.getElementById('appointmentActionModal');
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            currentAppointmentId = null;
+            currentAction = null;
+        }
+
+        async function fetchAppointmentDetails(id) {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE}/api/appointments/${id}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (response.ok) {
+                return await response.json();
+            }
+            throw new Error('Failed to fetch');
+        }
+
+        async function confirmAction() {
+            if (!currentAppointmentId || !currentAction) return;
+            try {
+                const token = localStorage.getItem('token');
+                const status = currentAction === 'accept' ? 'confirmed' : 'cancelled';
+                const response = await fetch(`${API_BASE}/api/appointments/${currentAppointmentId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status })
+                });
+                if (response.ok) {
+                    closeAppointmentActionModal();
+                    loadPendingAppointments();
+                    alert(currentAction === 'accept' ? 'Qabul qilindi' : 'Rad etildi');
+                } else {
+                    throw new Error('Update failed');
+                }
+            } catch (error) {
+                console.error('Xatolik:', error);
+                alert('Amalni bajarib bo\'lmadi');
+            }
+        }
+
+        async function loadPendingAppointments() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE}/api/appointments?status=pending`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    const appointments = await response.json();
+                    displayPendingAppointments(appointments);
+                }
+            } catch (error) {
+                console.error('Xatolik:', error);
+            }
+        }
+
+        function displayPendingAppointments(appointments) {
+            const container = document.getElementById('appointmentsList');
+            container.innerHTML = '';
+            if (appointments.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-500 italic py-8">Pending qabul yo\'q</p>';
+                return;
+            }
+            appointments.forEach((appointment, index) => {
+                const apptElement = document.createElement('div');
+                apptElement.className = 'appointment-item luxury-card p-6 rounded-2xl hover:shadow-xl transition-all stagger-item animate-stagger-fade opacity-0';
+                apptElement.style.animationDelay = index * 0.1 + 's';
+                apptElement.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <img src="${appointment.patient.profile.avatar || DEFAULT_AVATAR}" alt="Avatar" class="w-12 h-12 rounded-full object-cover avatar-hover" onerror="this.src='${DEFAULT_AVATAR}'">
+                            <div>
+                                <h4 class="font-bold text-gray-800">${appointment.patient.profile.firstName} ${appointment.patient.profile.lastName}</h4>
+                                <p class="text-sm text-gray-600">${new Date(appointment.date).toLocaleDateString('uz-UZ')} ${appointment.time}</p>
+                                <p class="text-sm text-gray-500 line-clamp-2">${appointment.notes || 'Izoh yo\'q'}</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="openActionModal('${appointment._id}', 'accept')" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition-all">Qabul qilish</button>
+                            <button onclick="openActionModal('${appointment._id}', 'reject')" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium transition-all">Rad etish</button>
+                        </div>
+                    </div>
+                `;
+                setTimeout(() => apptElement.classList.remove('opacity-0'), 10);
+                container.appendChild(apptElement);
+            });
         }
 
         // Chat modal functions
@@ -523,6 +705,9 @@
             await loadUserPosts(userId);
             if (isOwnProfile) {
                 document.getElementById('chatsToggle').classList.remove('hidden');
+            }
+            if (isOwnProfile && currentUser.role === 'doctor') {
+                document.getElementById('appointmentsToggle').classList.remove('hidden');
             }
             setupRating();
             setupModals();
@@ -836,6 +1021,12 @@
                 if (e.target.id === 'chatModal') closeChatModal();
             });
             document.getElementById('closeChatModal').addEventListener('click', closeChatModal);
+
+            // Appointment action modal outside click
+            document.getElementById('appointmentActionModal').addEventListener('click', (e) => {
+                if (e.target.id === 'appointmentActionModal') closeAppointmentActionModal();
+            });
+            document.getElementById('confirmActionBtn').addEventListener('click', confirmAction);
         }
 
         // Profilni tahrirlash formasi

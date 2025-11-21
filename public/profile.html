@@ -538,7 +538,7 @@
             if (!currentAppointmentId || !currentAction) return;
             try {
                 const token = localStorage.getItem('token');
-                const status = currentAction === 'accept' ? 'confirmed' : 'cancelled';
+                const status = currentAction === 'accept' ? 'accepted' : 'rejected';
                 const response = await fetch(`${API_BASE}/api/appointments/${currentAppointmentId}`, {
                     method: 'PUT',
                     headers: {

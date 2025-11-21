@@ -7,14 +7,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/socket.io/socket.io.js"></script>
     <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-5JL69NVS52"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-5JL69NVS52"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
 
-  gtag('config', 'G-5JL69NVS52');
-</script>
+      gtag('config', 'G-5JL69NVS52');
+    </script>
     <script>
         tailwind.config = {
             theme: {
@@ -33,7 +33,9 @@
                         'stagger-fade': 'staggerFade 0.3s ease-out forwards',
                         'pulse-slow': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                         'spin-slow': 'spin 1s linear infinite',
-                        'slide-in-right': 'slideInRight 0.5s ease-out forwards'
+                        'slide-in-right': 'slideInRight 0.5s ease-out forwards',
+                        'luxury-glow': 'luxuryGlow 2s ease-in-out infinite alternate',
+                        'image-hover': 'imageHover 0.4s ease-out forwards'
                     },
                     keyframes: {
                         fadeInUp: {
@@ -47,6 +49,14 @@
                         slideInRight: {
                             '0%': { transform: 'translateX(100%)', opacity: '0' },
                             '100%': { transform: 'translateX(0)', opacity: '1' }
+                        },
+                        luxuryGlow: {
+                            '0%': { boxShadow: '0 0 10px rgba(245, 158, 11, 0.3), 0 0 20px rgba(20, 184, 166, 0.2)' },
+                            '100%': { boxShadow: '0 0 20px rgba(245, 158, 11, 0.5), 0 0 30px rgba(20, 184, 166, 0.4)' }
+                        },
+                        imageHover: {
+                            '0%': { transform: 'scale(1)', filter: 'brightness(1)' },
+                            '100%': { transform: 'scale(1.02)', filter: 'brightness(1.1)' }
                         }
                     }
                 }
@@ -69,12 +79,29 @@
         .gold-glow {
             box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
         }
+        .luxury-card {
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
+            border: 1px solid rgba(245, 158, 11, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        .luxury-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #14b8a6, #f59e0b);
+        }
         .avatar-hover {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(245, 158, 11, 0.2);
         }
         .avatar-hover:hover {
+            border-color: #f59e0b;
             transform: scale(1.05);
-            box-shadow: 0 10px 25px rgba(20, 184, 166, 0.3);
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
         }
         .modal-enter {
             animation: slideInRight 0.3s ease-out forwards;
@@ -86,8 +113,21 @@
         .message.sent { text-align: right; }
         .message.received { text-align: left; }
         .chat-bubble { display: inline-block; max-width: 70%; padding: 0.75rem 1rem; border-radius: 1rem; }
-        .chat-bubble.sent { background: #14b8a6; color: white; }
-        .chat-bubble.received { background: #e5e7eb; color: #374151; }
+        .chat-bubble.sent { background: linear-gradient(135deg, #14b8a6, #0d9488); color: white; }
+        .chat-bubble.received { background: linear-gradient(135deg, #f3f4f6, #e5e7eb); color: #374151; }
+        .post-image {
+            transition: all 0.4s ease;
+            cursor: pointer;
+            position: relative;
+        }
+        .post-image:hover {
+            animation: imageHover 0.4s ease-out forwards;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        .chat-modal { height: 90vh; max-height: 90vh; }
+        @media (max-width: 640px) {
+            .chat-modal { height: 95vh; max-height: 95vh; }
+        }
     </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-teal-gold-50 to-gray-50">
@@ -132,44 +172,42 @@
     <main class="container mx-auto px-4 py-8 max-w-6xl">
         <div class="profile-container animate-fade-in-up">
             <!-- Profil header -->
-            <div class="profile-header bg-white rounded-2xl shadow-lg p-6 mb-8 overflow-hidden gold-glow">
-                <div class="flex flex-col md:flex-row items-center md:items-start gap-6">
-                    <div class="flex-shrink-0">
-                        <div class="relative">
-                            <img id="avatarImg" src="/uploads/avatars/default.png" alt="Avatar" 
-                                 class="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover avatar-hover border-4 border-teal-200">
-                            <input type="file" id="avatarInput" accept="image/*" style="display: none;" class="hidden">
-                            <button onclick="document.getElementById('avatarInput').click()" 
-                                    class="absolute bottom-2 right-2 bg-teal-600 text-white p-2 rounded-full hover:bg-teal-700 transition-all animate-pulse-slow">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
-                                    <circle cx="12" cy="12" r="3"></circle>
-                                </svg>
-                            </button>
-                        </div>
+            <div class="profile-header luxury-card rounded-3xl shadow-2xl p-8 mb-8 overflow-hidden gold-glow">
+                <div class="flex flex-col md:flex-row items-center md:items-start gap-8">
+                    <div class="flex-shrink-0 relative">
+                        <img id="avatarImg" src="https://via.placeholder.com/150x150/14b8a6/ffffff?text=U" alt="Avatar" 
+                             class="w-32 h-32 md:w-48 md:h-48 rounded-full object-cover avatar-hover border-4 border-teal-200/50 shadow-lg">
+                        <input type="file" id="avatarInput" accept="image/*" style="display: none;" class="hidden">
+                        <button onclick="document.getElementById('avatarInput').click()" 
+                                class="absolute bottom-2 right-2 bg-gradient-to-r from-teal-600 to-teal-700 text-white p-3 rounded-full hover:from-teal-700 hover:to-teal-800 transition-all shadow-lg animate-pulse-slow">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
                     </div>
                     <div class="flex-1 text-center md:text-left">
-                        <h1 id="profileName" class="text-3xl md:text-4xl font-bold text-gray-800 mb-2 brand-text"></h1>
-                        <p id="profileUsername" class="text-teal-600 font-semibold text-lg mb-4"></p>
-                        <p id="profileBio" class="text-gray-600 mb-6 italic max-w-2xl"></p>
-                        <div class="profile-stats flex flex-wrap justify-center md:justify-start gap-4 mb-6">
-                            <div class="stat bg-teal-50 p-4 rounded-xl text-center min-w-[80px] animate-slide-in-right">
-                                <strong id="postsCount" class="text-2xl font-bold text-teal-600 block">0</strong>
-                                <span class="text-sm text-gray-600">Postlar</span>
+                        <h1 id="profileName" class="text-3xl md:text-5xl font-bold text-gray-800 mb-2 brand-text"></h1>
+                        <p id="profileUsername" class="text-teal-600 font-semibold text-xl mb-4"></p>
+                        <p id="profileBio" class="text-gray-600 mb-8 italic max-w-3xl leading-relaxed text-lg"></p>
+                        <div class="profile-stats flex flex-wrap justify-center md:justify-start gap-6 mb-8">
+                            <div class="stat luxury-card p-6 rounded-2xl text-center min-w-[100px] animate-slide-in-right">
+                                <strong id="postsCount" class="text-3xl font-bold text-teal-600 block">0</strong>
+                                <span class="text-sm text-gray-600 font-medium">Postlar</span>
                             </div>
-                            <div class="stat bg-teal-50 p-4 rounded-xl text-center min-w-[80px] animate-slide-in-right" style="animation-delay: 0.1s;">
-                                <strong id="followersCount" class="text-2xl font-bold text-teal-600 block">0</strong>
-                                <span class="text-sm text-gray-600">Obunachilar</span>
+                            <div class="stat luxury-card p-6 rounded-2xl text-center min-w-[100px] animate-slide-in-right" style="animation-delay: 0.1s;">
+                                <strong id="followersCount" class="text-3xl font-bold text-teal-600 block">0</strong>
+                                <span class="text-sm text-gray-600 font-medium">Obunachilar</span>
                             </div>
-                            <div class="stat bg-teal-50 p-4 rounded-xl text-center min-w-[80px] animate-slide-in-right" style="animation-delay: 0.2s;">
-                                <strong id="followingCount" class="text-2xl font-bold text-teal-600 block">0</strong>
-                                <span class="text-sm text-gray-600">Obunalar</span>
+                            <div class="stat luxury-card p-6 rounded-2xl text-center min-w-[100px] animate-slide-in-right" style="animation-delay: 0.2s;">
+                                <strong id="followingCount" class="text-3xl font-bold text-teal-600 block">0</strong>
+                                <span class="text-sm text-gray-600 font-medium">Obunalar</span>
                             </div>
                         </div>
                         <!-- Reyting komponenti (faqat doctor uchun va o'z profil emas) -->
-                        <div id="ratingSection" class="hidden mb-4">
-                            <h4 id="ratingTitle" class="text-lg font-semibold text-gray-700 mb-2">Reyting bering (1-5 yulduz):</h4>
-                            <div class="flex items-center gap-2">
+                        <div id="ratingSection" class="hidden mb-6 p-4 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-2xl border border-yellow-200">
+                            <h4 id="ratingTitle" class="text-xl font-semibold text-gray-700 mb-3">Reyting bering (1-5 yulduz):</h4>
+                            <div class="flex items-center gap-3">
                                 <div class="stars flex" id="ratingStars">
                                     <span class="star" data-rating="1">★</span>
                                     <span class="star" data-rating="2">★</span>
@@ -177,11 +215,11 @@
                                     <span class="star" data-rating="4">★</span>
                                     <span class="star" data-rating="5">★</span>
                                 </div>
-                                <button id="submitRating" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-semibold transition-all">Baholash</button>
+                                <button id="submitRating" class="bg-gradient-to-r from-gold-accent to-amber-500 hover:from-amber-500 hover:to-amber-600 text-white px-6 py-3 rounded-xl font-semibold transition-all shadow-lg">Baholash</button>
                             </div>
-                            <p id="ratingFeedback" class="text-sm text-gray-500 mt-2 hidden">Qoniqdingizmi? <button class="satisfied-btn bg-green-500 text-white px-2 py-1 rounded mr-2">Ha</button> <button class="unsatisfied-btn bg-red-500 text-white px-2 py-1 rounded">Yo'q</button></p>
+                            <p id="ratingFeedback" class="text-sm text-gray-500 mt-3 hidden flex items-center gap-2">Qoniqdingizmi? <button class="satisfied-btn bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg font-medium transition-all">Ha</button> <button class="unsatisfied-btn bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg font-medium transition-all">Yo'q</button></p>
                         </div>
-                        <div id="actionButtons" class="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
+                        <div id="actionButtons" class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                             <!-- Action buttons will be inserted here -->
                         </div>
                     </div>
@@ -189,42 +227,45 @@
             </div>
 
             <!-- Shifokor statistikasi -->
-            <div id="doctorStats" class="doctor-stats hidden bg-white rounded-2xl shadow-md p-6 mb-8 gold-glow animate-fade-in-up">
-                <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center brand-text">Statistika</h3>
-                <div class="stats-grid grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="stat-card bg-gradient-to-r from-teal-50 to-teal-100 p-6 rounded-xl text-center hover:shadow-lg transition-all">
-                        <h4 class="text-lg font-semibold text-gray-700 mb-2">O'rtacha Reyting</h4>
-                        <div class="rating text-3xl font-bold text-teal-600" id="doctorRating">0.0</div>
-                        <div class="stars flex justify-center mt-2" id="avgStars"></div>
+            <div id="doctorStats" class="doctor-stats hidden luxury-card rounded-3xl shadow-2xl p-8 mb-8 gold-glow animate-fade-in-up">
+                <h3 class="text-3xl font-bold text-gray-800 mb-8 text-center brand-text">Statistika</h3>
+                <div class="stats-grid grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="stat-card bg-gradient-to-r from-teal-50 to-teal-100 p-8 rounded-2xl text-center hover:shadow-xl transition-all luxury-glow">
+                        <h4 class="text-xl font-semibold text-gray-700 mb-3">O'rtacha Reyting</h4>
+                        <div class="rating text-4xl font-bold text-teal-600 mb-2" id="doctorRating">0.0</div>
+                        <div class="stars flex justify-center" id="avgStars"></div>
                     </div>
-                    <div class="stat-card bg-gradient-to-r from-green-50 to-green-100 p-6 rounded-xl text-center hover:shadow-lg transition-all">
-                        <h4 class="text-lg font-semibold text-gray-700 mb-2">Qoniqarli holatlar</h4>
-                        <div class="success-count text-3xl font-bold text-green-600" id="successfulCases">0</div>
+                    <div class="stat-card bg-gradient-to-r from-green-50 to-green-100 p-8 rounded-2xl text-center hover:shadow-xl transition-all luxury-glow">
+                        <h4 class="text-xl font-semibold text-gray-700 mb-3">Qoniqarli holatlar</h4>
+                        <div class="success-count text-4xl font-bold text-green-600" id="successfulCases">0</div>
                     </div>
-                    <div class="stat-card bg-gradient-to-r from-red-50 to-red-100 p-6 rounded-xl text-center hover:shadow-lg transition-all">
-                        <h4 class="text-lg font-semibold text-gray-700 mb-2">Qoniqsiz holatlar</h4>
-                        <div class="failed-count text-3xl font-bold text-red-600" id="failedCases">0</div>
+                    <div class="stat-card bg-gradient-to-r from-red-50 to-red-100 p-8 rounded-2xl text-center hover:shadow-xl transition-all luxury-glow">
+                        <h4 class="text-xl font-semibold text-gray-700 mb-3">Qoniqsiz holatlar</h4>
+                        <div class="failed-count text-4xl font-bold text-red-600" id="failedCases">0</div>
                     </div>
                 </div>
             </div>
 
             <!-- O'z chatlari (faqat o'z profil uchun, toggle bilan) -->
-            <div id="chatsToggle" class="hidden mb-6">
-                <button id="toggleChatsBtn" onclick="toggleChats()" class="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg font-semibold transition-all">
+            <div id="chatsToggle" class="hidden mb-8">
+                <button id="toggleChatsBtn" onclick="toggleChats()" class="luxury-card inline-flex items-center gap-2 bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white px-8 py-4 rounded-2xl font-semibold transition-all shadow-lg hover:shadow-xl">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                    </svg>
                     Chatlarni ko'rsatish
                 </button>
             </div>
-            <div id="chatsSection" class="chats-section hidden bg-white rounded-2xl shadow-md p-6 mb-8 gold-glow">
-                <h3 class="text-2xl font-bold text-gray-800 mb-6 brand-text">Chatlar</h3>
-                <div id="chatsList" class="space-y-4">
+            <div id="chatsSection" class="chats-section hidden luxury-card rounded-3xl shadow-2xl p-8 mb-8 gold-glow">
+                <h3 class="text-3xl font-bold text-gray-800 mb-8 brand-text">Chatlar</h3>
+                <div id="chatsList" class="space-y-4 max-h-96 overflow-y-auto">
                     <!-- Chatlar ro'yxati -->
                 </div>
             </div>
 
             <!-- Foydalanuvchi postlari -->
-            <div class="user-posts bg-white rounded-2xl shadow-md p-6 gold-glow">
-                <h3 class="text-2xl font-bold text-gray-800 mb-6 brand-text">Postlar</h3>
-                <div id="userPostsContainer" class="posts-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 space-y-4">
+            <div class="user-posts luxury-card rounded-3xl shadow-2xl p-8 gold-glow">
+                <h3 class="text-3xl font-bold text-gray-800 mb-8 brand-text">Postlar</h3>
+                <div id="userPostsContainer" class="posts-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 space-y-6">
                     <!-- Foydalanuvchi postlari stagger animatsiya bilan -->
                 </div>
             </div>
@@ -232,25 +273,25 @@
     </main>
 
     <!-- Edit Profile Modal -->
-    <div id="editModal" class="modal fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden p-4">
-        <div class="modal-content bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto relative gold-glow modal-enter">
-            <span class="close absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-3xl cursor-pointer z-10 font-bold" onclick="closeEditModal()">&times;</span>
-            <div class="p-6">
-                <h3 class="text-2xl font-bold text-gray-800 mb-6 brand-text text-center">Profilni tahrirlash</h3>
-                <form id="editProfileForm" class="space-y-4" enctype="multipart/form-data">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div id="editModal" class="modal fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden p-4 backdrop-blur-sm">
+        <div class="modal-content luxury-card rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative gold-glow modal-enter">
+            <span class="close absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-3xl cursor-pointer z-10 font-bold transition-colors" onclick="closeEditModal()">&times;</span>
+            <div class="p-8">
+                <h3 class="text-3xl font-bold text-gray-800 mb-8 brand-text text-center">Profilni tahrirlash</h3>
+                <form id="editProfileForm" class="space-y-6" enctype="multipart/form-data">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <input type="text" id="firstName" placeholder="Ism" required
-                               class="p-4 border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all hover:gold-glow">
+                               class="p-4 border border-teal-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all hover:gold-glow text-lg">
                         <input type="text" id="lastName" placeholder="Familiya" required
-                               class="p-4 border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all hover:gold-glow">
+                               class="p-4 border border-teal-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all hover:gold-glow text-lg">
                     </div>
-                    <textarea id="bio" placeholder="Bio" rows="3" 
-                              class="w-full p-4 border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all hover:gold-glow"></textarea>
+                    <textarea id="bio" placeholder="Bio" rows="4" 
+                              class="w-full p-4 border border-teal-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all hover:gold-glow resize-none text-lg"></textarea>
                     <input type="tel" id="phone" placeholder="Telefon raqami"
-                           class="w-full p-4 border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all hover:gold-glow">
+                           class="w-full p-4 border border-teal-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all hover:gold-glow text-lg">
                     
                     <!-- Location select for doctors -->
-                    <select id="location" class="w-full p-4 border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all hover:gold-glow hidden">
+                    <select id="location" class="w-full p-4 border border-teal-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all hover:gold-glow hidden text-lg">
                         <option value="">Manzilni tanlang</option>
                         <option value="Toshkent">Toshkent</option>
                         <option value="Samarqand">Samarqand</option>
@@ -265,7 +306,7 @@
                     </select>
 
                     <!-- Specialization select for doctors -->
-                    <select id="specialization" class="w-full p-4 border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all hover:gold-glow hidden">
+                    <select id="specialization" class="w-full p-4 border border-teal-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all hover:gold-glow hidden text-lg">
                         <option value="">Mutaxassislikni tanlang</option>
                         <option value="Terapevt">Terapevt</option>
                         <option value="Nevrolog">Nevrolog</option>
@@ -279,10 +320,10 @@
                         <option value="Boshqa">Boshqa</option>
                     </select>
 
-                    <input type="file" id="avatarFile" accept="image/*" class="w-full p-4 border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all hover:gold-glow">
+                    <input type="file" id="avatarFile" accept="image/*" class="w-full p-4 border border-teal-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all hover:gold-glow file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100">
                     <small class="text-gray-500 text-sm block">Profil rasmini almashtirish (ixtiyoriy)</small>
                     
-                    <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white py-3 rounded-lg font-semibold transition-all animate-pulse-slow">
+                    <button type="submit" class="w-full bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white py-4 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl animate-pulse-slow text-lg">
                         Saqlash
                     </button>
                 </form>
@@ -291,16 +332,17 @@
     </div>
 
     <!-- Chat Modal -->
-    <div id="chatModal" class="modal fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden p-4 animate-fade-in-up">
-        <div class="modal-content bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[80vh] overflow-hidden relative gold-glow">
-            <span class="close absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-3xl cursor-pointer z-10 font-bold" id="closeChatModal">&times;</span>
-            <div id="chatContainer" class="p-6 h-[80vh] flex flex-col">
+    <div id="chatModal" class="modal fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden p-4 backdrop-blur-sm chat-modal">
+        <div class="modal-content luxury-card rounded-3xl shadow-2xl w-full max-w-4xl h-full flex flex-col relative gold-glow">
+            <span class="close absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-3xl cursor-pointer z-10 font-bold transition-colors" id="closeChatModal">&times;</span>
+            <div id="chatContainer" class="flex-1 flex flex-col overflow-hidden">
                 <!-- Chat will be inserted here -->
             </div>
         </div>
     </div>
 
     <script>
+        const API_BASE = 'https://med-uz.onrender.com';
         let currentUser = null;
         let profileUser = null;
         let isOwnProfile = false;
@@ -310,6 +352,7 @@
         let hasRated = false;
         let lastAppointmentId = null;
         let chatsVisible = false;
+        const DEFAULT_AVATAR = 'https://via.placeholder.com/150x150/14b8a6/ffffff?text=U';
 
         // Socket connection
         function initSocket() {
@@ -339,7 +382,9 @@
             const toggleBtn = document.getElementById('toggleChatsBtn');
             chatsVisible = !chatsVisible;
             chatsSection.classList.toggle('hidden');
-            toggleBtn.textContent = chatsVisible ? 'Chatlarni yashirish' : 'Chatlarni ko\'rsatish';
+            toggleBtn.innerHTML = chatsVisible ? 
+                '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg> Chatlarni yashirish' : 
+                '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg> Chatlarni ko\'rsatish';
             if (chatsVisible) {
                 loadChats();
             }
@@ -386,14 +431,23 @@
             const participant = chat.participants.find(p => p._id !== currentUser.id);
             
             container.innerHTML = `
-                <div class="flex-1 flex flex-col">
-                    <h3 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">${participant.profile.firstName} ${participant.profile.lastName}</h3>
-                    <div class="chat-messages flex-1 overflow-y-auto space-y-2 mb-4 p-2 bg-gray-50 rounded-lg" id="chatMessages">
+                <div class="flex flex-col h-full">
+                    <div class="p-6 pb-4 border-b border-teal-100 bg-gradient-to-r from-teal-50 to-teal-100">
+                        <h3 class="text-2xl font-bold text-gray-800">${participant.profile.firstName} ${participant.profile.lastName}</h3>
+                        <p class="text-teal-600 text-sm mt-1">@${participant.username}</p>
+                    </div>
+                    <div class="chat-messages flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-gray-50 to-white" id="chatMessages">
                         ${chat.messages.map(msg => createMessageElement(msg)).join('')}
                     </div>
-                    <div class="chat-input flex gap-2">
-                        <input type="text" id="messageInput" placeholder="Xabar yozing..." class="flex-1 p-3 border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" onkeypress="handleKeyPress(event)">
-                        <button onclick="sendMessage()" class="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg font-semibold transition-all">Yuborish</button>
+                    <div class="p-4 pt-0 border-t border-teal-100 bg-white">
+                        <div class="chat-input flex gap-3">
+                            <input type="text" id="messageInput" placeholder="Xabar yozing..." class="flex-1 p-4 border border-teal-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all" onkeypress="handleKeyPress(event)">
+                            <button onclick="sendMessage()" class="bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white px-6 py-4 rounded-2xl font-semibold transition-all shadow-lg">
+                                <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-2-9-9 2 2 9z"></path>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -417,7 +471,7 @@
             return `
                 <div class="message ${isSent ? 'sent' : 'received'}">
                     <div class="chat-bubble ${isSent ? 'sent' : 'received'}">
-                        <p>${msg.text}</p>
+                        <p class="text-sm">${msg.text}</p>
                         <small class="text-xs opacity-75 block mt-1">${new Date(msg.timestamp).toLocaleTimeString()}</small>
                     </div>
                 </div>
@@ -477,7 +531,7 @@
         async function loadProfile(userId) {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`https://med-uz.onrender.com/api/users/${userId}`, {
+                const response = await fetch(`${API_BASE}/api/users/${userId}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -511,8 +565,8 @@
             
             // Avatar (Cloudinary URL)
             const avatarImg = document.getElementById('avatarImg');
-            avatarImg.src = user.profile.avatar || '/uploads/avatars/default.png';
-            avatarImg.onerror = () => { avatarImg.src = '/uploads/avatars/default.png'; };
+            avatarImg.src = user.profile.avatar || DEFAULT_AVATAR;
+            avatarImg.onerror = () => { avatarImg.src = DEFAULT_AVATAR; };
             
             // Shifokor statistikasi
             if (user.role === 'doctor') {
@@ -573,7 +627,7 @@
         async function checkAppointmentForRating(doctorId) {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`https://med-uz.onrender.com/api/appointments?doctor=${doctorId}&status=completed`, {
+                const response = await fetch(`${API_BASE}/api/appointments?doctor=${doctorId}&status=completed`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (response.ok) {
@@ -586,7 +640,7 @@
                             document.getElementById('ratingTitle').textContent = 'Reytingni yangilang (1-5 yulduz):';
                         }
                     } else {
-                        document.getElementById('ratingSection').innerHTML = '<p class="text-red-500">Qabul tugallanmagan. Reyting bera olmaysiz.</p>';
+                        document.getElementById('ratingSection').innerHTML = '<p class="text-red-500 text-center py-4">Qabul tugallanmagan. Reyting bera olmaysiz.</p>';
                         return;
                     }
                 }
@@ -601,7 +655,7 @@
             try {
                 const token = localStorage.getItem('token');
                 const feedback = isSatisfied ? 'qoniqdim' : 'qoniqmadim';
-                const response = await fetch(`https://med-uz.onrender.com/api/appointments/${lastAppointmentId}`, {
+                const response = await fetch(`${API_BASE}/api/appointments/${lastAppointmentId}`, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -626,17 +680,23 @@
             
             if (isOwnProfile) {
                 actionButtons.innerHTML = `
-                    <button onclick="openEditModal()" class="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg font-semibold transition-all animate-pulse-slow">
+                    <button onclick="openEditModal()" class="luxury-card inline-flex items-center gap-2 bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white px-8 py-4 rounded-2xl font-semibold transition-all shadow-lg hover:shadow-xl animate-pulse-slow">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                        </svg>
                         Profilni tahrirlash
                     </button>
                 `;
             } else {
                 const isFollowing = profileUser.followers.some(f => f._id === currentUser.id);
                 actionButtons.innerHTML = `
-                    <button onclick="toggleFollow('${profileUser._id}')" class="px-6 py-3 rounded-lg font-semibold transition-all ${isFollowing ? 'bg-gray-300 hover:bg-gray-400 text-gray-700' : 'bg-teal-600 hover:bg-teal-700 text-white'}">
+                    <button onclick="toggleFollow('${profileUser._id}')" class="px-8 py-4 rounded-2xl font-semibold transition-all ${isFollowing ? 'bg-gray-300 hover:bg-gray-400 text-gray-700 luxury-card' : 'bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white luxury-card shadow-lg hover:shadow-xl'}">
                         ${isFollowing ? 'Obunani bekor qilish' : 'Obuna bo\'lish'}
                     </button>
-                    <button onclick="startChat('${profileUser._id}')" class="bg-gold-accent hover:bg-amber-500 text-white px-6 py-3 rounded-lg font-semibold transition-all">
+                    <button onclick="startChat('${profileUser._id}')" class="luxury-card inline-flex items-center gap-2 bg-gradient-to-r from-gold-accent to-amber-500 hover:from-amber-500 hover:to-amber-600 text-white px-8 py-4 rounded-2xl font-semibold transition-all shadow-lg hover:shadow-xl">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                        </svg>
                         Xabar yuborish
                     </button>
                 `;
@@ -646,7 +706,7 @@
         async function toggleFollow(userId) {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`https://med-uz.onrender.com/api/users/${userId}/follow`, {
+                const response = await fetch(`${API_BASE}/api/users/${userId}/follow`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -668,7 +728,7 @@
         async function startChat(userId) {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch('https://med-uz.onrender.com/api/chats', {
+                const response = await fetch(`${API_BASE}/api/chats`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -690,7 +750,7 @@
         async function loadChats() {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch('https://med-uz.onrender.com/api/chats', {
+                const response = await fetch(`${API_BASE}/api/chats`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (response.ok) {
@@ -708,27 +768,29 @@
             const container = document.getElementById('chatsList');
             container.innerHTML = '';
             if (chats.length === 0) {
-                container.innerHTML = '<p class="text-gray-500 italic">Aktiv chatlar yo\'q</p>';
+                container.innerHTML = '<p class="text-center text-gray-500 italic py-8">Aktiv chatlar yo\'q</p>';
                 return;
             }
             chats.forEach(chat => {
                 const lastMsg = chat.messages[chat.messages.length - 1];
                 const participant = chat.participants.find(p => p._id !== currentUser.id);
                 const chatElement = document.createElement('div');
-                chatElement.className = 'chat-item bg-teal-50 p-4 rounded-lg cursor-pointer hover:bg-teal-100 transition-all';
+                chatElement.className = 'chat-item luxury-card p-6 rounded-2xl cursor-pointer hover:shadow-xl transition-all duration-300 stagger-item animate-stagger-fade opacity-0';
                 chatElement.onclick = () => openChatModal(chat);
                 chatElement.innerHTML = `
                     <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <img src="${participant.profile.avatar || '/uploads/avatars/default.png'}" alt="Avatar" class="w-10 h-10 rounded-full">
+                        <div class="flex items-center gap-4">
+                            <img src="${participant.profile.avatar || DEFAULT_AVATAR}" alt="Avatar" class="w-12 h-12 rounded-full object-cover avatar-hover" onerror="this.src='${DEFAULT_AVATAR}'">
                             <div>
-                                <h4 class="font-semibold">${participant.profile.firstName} ${participant.profile.lastName}</h4>
-                                <p class="text-sm text-gray-600">${lastMsg ? lastMsg.text.substring(0, 30) + '...' : 'Yangi chat'}</p>
+                                <h4 class="font-bold text-gray-800">${participant.profile.firstName} ${participant.profile.lastName}</h4>
+                                <p class="text-sm text-gray-600 line-clamp-1">${lastMsg ? lastMsg.text : 'Yangi chat'}</p>
                             </div>
                         </div>
-                        <small class="text-xs text-gray-500">${lastMsg ? new Date(lastMsg.timestamp).toLocaleDateString() : ''}</small>
+                        <small class="text-xs text-gray-500 font-medium">${lastMsg ? new Date(lastMsg.timestamp).toLocaleDateString('uz-UZ') : ''}</small>
                     </div>
                 `;
+                // Animatsiyani boshlash
+                setTimeout(() => chatElement.classList.remove('opacity-0'), 10);
                 container.appendChild(chatElement);
             });
         }
@@ -741,7 +803,7 @@
             
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`https://med-uz.onrender.com/api/chats/${currentChatId}/messages`, {
+                const response = await fetch(`${API_BASE}/api/chats/${currentChatId}/messages`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -795,7 +857,7 @@
             
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`https://med-uz.onrender.com/api/users/${currentUser.id}`, {
+                const response = await fetch(`${API_BASE}/api/users/${currentUser.id}`, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -821,7 +883,7 @@
         async function loadUserPosts(userId) {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`https://med-uz.onrender.com/api/posts?author=${userId}`, {
+                const response = await fetch(`${API_BASE}/api/posts?author=${userId}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -841,18 +903,38 @@
             container.innerHTML = '';
             
             posts.forEach((post, index) => {
+                const imageUrl = post.image || '';
                 const postElement = document.createElement('div');
-                postElement.className = 'post-card bg-teal-50 rounded-xl p-4 hover:shadow-lg transition-all duration-300 stagger-item animate-stagger-fade opacity-0';
+                postElement.className = 'post-card luxury-card rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer stagger-item animate-stagger-fade opacity-0';
                 postElement.style.animationDelay = (index % 6) * 0.1 + 's';
                 postElement.innerHTML = `
-                    ${post.image ? `<img src="${post.image}" alt="Post image" class="w-full h-48 object-cover rounded-lg mb-4 cursor-pointer hover:brightness-105 transition-all">` : ''}
-                    <h3 class="text-lg font-bold text-gray-800 mb-2">${post.title}</h3>
-                    <p class="text-gray-600 mb-4 line-clamp-2">${post.content}</p>
-                    <div class="post-meta flex justify-between items-center text-sm text-gray-500">
-                        <span>${new Date(post.createdAt).toLocaleDateString('uz-UZ')}</span>
-                        <div class="flex gap-4">
-                            <span>👍 ${post.likes.length}</span>
-                            <span>💬 ${post.comments.length}</span>
+                    <div class="post-header flex items-center gap-3 p-5 bg-gradient-to-r from-teal-50 to-teal-100 border-b border-teal-100">
+                        <img src="${post.author.profile.avatar || DEFAULT_AVATAR}" alt="Avatar" class="w-10 h-10 rounded-full object-cover avatar-hover" onerror="this.src='${DEFAULT_AVATAR}'">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-bold text-gray-800 truncate text-sm">${post.author.profile.firstName} ${post.author.profile.lastName}</h4>
+                            <small class="text-teal-600">@${post.author.username}</small>
+                        </div>
+                        <small class="text-xs text-gray-500">${new Date(post.createdAt).toLocaleDateString('uz-UZ')}</small>
+                    </div>
+                    ${imageUrl ? `<div class="post-image relative overflow-hidden">
+                        <img src="${imageUrl}" class="w-full h-48 object-cover" 
+                             onerror="this.onerror=null; this.src='https://via.placeholder.com/300x200/14b8a6/ffffff?text=No+Image'; this.alt='Rasm yuklanmadi';">
+                    </div>` : ''}
+                    <div class="p-5">
+                        <h3 class="text-xl font-bold text-gray-900 mb-3 leading-tight">${post.title}</h3>
+                        <p class="text-gray-600 mb-5 line-clamp-3 leading-relaxed text-sm">${post.content}</p>
+                        <div class="post-actions flex justify-between items-center mb-4">
+                            <div class="flex gap-4">
+                                <button class="like-btn flex items-center gap-2 text-teal-600 hover:text-red-500 transition-all font-medium">
+                                    <span class="text-lg">❤️</span> ${post.likes.length}
+                                </button>
+                                <button class="comment-btn flex items-center gap-2 text-teal-600 hover:text-teal-700 transition-all font-medium">
+                                    <span class="text-lg">💬</span> ${post.comments.length}
+                                </button>
+                            </div>
+                        </div>
+                        <div class="post-category flex justify-end">
+                            <span class="inline-block bg-gradient-to-r from-gold-accent to-amber-500 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-md">${post.category}</span>
                         </div>
                     </div>
                 `;

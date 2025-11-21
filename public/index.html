@@ -6,14 +6,14 @@
     <title>Asosiy sahifa</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-5JL69NVS52"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-5JL69NVS52"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
 
-  gtag('config', 'G-5JL69NVS52');
-</script>
+      gtag('config', 'G-5JL69NVS52');
+    </script>
     <script>
         tailwind.config = {
             theme: {
@@ -31,7 +31,9 @@
                         'fade-in-up': 'fadeInUp 0.6s ease-out forwards',
                         'stagger-fade': 'staggerFade 0.3s ease-out forwards',
                         'pulse-slow': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'spin-slow': 'spin 1s linear infinite'
+                        'spin-slow': 'spin 1s linear infinite',
+                        'luxury-glow': 'luxuryGlow 2s ease-in-out infinite alternate',
+                        'image-hover': 'imageHover 0.4s ease-out forwards'
                     },
                     keyframes: {
                         fadeInUp: {
@@ -41,6 +43,14 @@
                         staggerFade: {
                             '0%': { opacity: '0', transform: 'scale(0.95)' },
                             '100%': { opacity: '1', transform: 'scale(1)' }
+                        },
+                        luxuryGlow: {
+                            '0%': { boxShadow: '0 0 10px rgba(245, 158, 11, 0.3), 0 0 20px rgba(20, 184, 166, 0.2)' },
+                            '100%': { boxShadow: '0 0 20px rgba(245, 158, 11, 0.5), 0 0 30px rgba(20, 184, 166, 0.4)' }
+                        },
+                        imageHover: {
+                            '0%': { transform: 'scale(1)', filter: 'brightness(1)' },
+                            '100%': { transform: 'scale(1.02)', filter: 'brightness(1.1)' }
                         }
                     }
                 }
@@ -62,6 +72,81 @@
         }
         .gold-glow {
             box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+        }
+        .luxury-card {
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
+            border: 1px solid rgba(245, 158, 11, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        .luxury-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #14b8a6, #f59e0b);
+        }
+        .profile-img {
+            transition: all 0.3s ease;
+            border: 2px solid rgba(245, 158, 11, 0.2);
+        }
+        .profile-img:hover {
+            border-color: #f59e0b;
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+        }
+        .post-image {
+            transition: all 0.4s ease;
+            cursor: pointer;
+            position: relative;
+        }
+        .post-image:hover {
+            animation: imageHover 0.4s ease-out forwards;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        .post-image::after {
+            content: '📷';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 50%;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .post-image:hover::after {
+            opacity: 1;
+        }
+        .modal-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+        .modal-image:hover {
+            transform: scale(1.02);
+        }
+        .comment-bubble {
+            position: relative;
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border-left: 4px solid #14b8a6;
+        }
+        .comment-bubble::before {
+            content: '';
+            position: absolute;
+            left: -12px;
+            top: 10px;
+            width: 0;
+            height: 0;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            border-right: 12px solid #14b8a6;
         }
     </style>
 </head>
@@ -106,28 +191,28 @@
 
     <main class="container mx-auto px-4 py-8 max-w-7xl">
         <!-- Search Section -->
-        <div class="search-section flex flex-col md:flex-row gap-4 mb-8 bg-white p-4 rounded-xl shadow-md gold-glow">
-            <input type="text" id="searchInput" placeholder="Postlar qidirish..." 
-                   class="flex-1 p-3 border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all">
-            <select id="categoryFilter" class="p-3 border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+        <div class="search-section flex flex-col md:flex-row gap-4 mb-8 bg-white p-6 rounded-2xl shadow-xl gold-glow border border-teal-100">
+            <input type="text" id="searchInput" placeholder="Postlar qidirish... (masalan: diabet)" 
+                   class="flex-1 p-4 border border-teal-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all bg-teal-50">
+            <select id="categoryFilter" class="p-4 border border-teal-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50">
                 <option value="">Barcha kategoriyalar</option>
-                <option value="sog'liq">Sog'liq</option>
-                <option value="dori">Dori</option>
-                <option value="kasallik">Kasallik</option>
-                <option value="tavsiya">Tavsiya</option>
+                <option value="sog'liq">Sog'liq maslahatlari</option>
+                <option value="dori">Dori vositalari</option>
+                <option value="kasallik">Kasalliklar</option>
+                <option value="tavsiya">Shifokor tavsiyalari</option>
             </select>
-            <button onclick="searchPosts()" class="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg font-semibold transition-all animate-pulse-slow">Qidirish</button>
+            <button onclick="searchPosts()" class="bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white px-8 py-4 rounded-xl font-semibold transition-all animate-pulse-slow shadow-lg hover:shadow-xl">🔍 Qidirish</button>
         </div>
 
         <!-- Posts Container -->
-        <div id="postsContainer" class="posts-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 space-y-4">
+        <div id="postsContainer" class="posts-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 space-y-6">
             <!-- Postlar shu yerda ko'rsatiladi -->
         </div>
 
         <!-- Loading Spinner -->
-        <div id="loading" class="hidden text-center py-8">
-            <div class="inline-block animate-spin-slow rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
-            <p class="text-teal-600 mt-2">Yuklanmoqda...</p>
+        <div id="loading" class="hidden text-center py-12">
+            <div class="inline-block animate-spin-slow rounded-full h-12 w-12 border-b-2 border-teal-600 border-t-2 border-gold-accent"></div>
+            <p class="text-teal-600 mt-4 font-semibold">Yuklanmoqda... Iltimos, kuting</p>
         </div>
 
         <!-- Load More Trigger -->
@@ -135,12 +220,20 @@
     </main>
 
     <!-- Post Modal -->
-    <div id="postModal" class="modal fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden p-4">
-        <div class="modal-content bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative gold-glow">
-            <span class="close absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl cursor-pointer z-10">&times;</span>
-            <div id="postDetails" class="p-6">
+    <div id="postModal" class="modal fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden p-4 backdrop-blur-sm">
+        <div class="modal-content bg-white rounded-3xl shadow-2xl max-w-6xl w-full max-h-[95vh] overflow-y-auto relative gold-glow animate-fade-in-up">
+            <span class="close absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-3xl cursor-pointer z-10 font-bold transition-colors">&times;</span>
+            <div id="postDetails" class="p-8">
                 <!-- Post tafsilotlari -->
             </div>
+        </div>
+    </div>
+
+    <!-- Image Lightbox Modal -->
+    <div id="imageModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-50 hidden p-4">
+        <div class="relative max-w-4xl w-full max-h-[90vh] flex items-center justify-center">
+            <span class="close-image absolute top-4 right-4 text-white text-3xl cursor-pointer z-10 hover:text-gray-300 transition-colors">&times;</span>
+            <img id="lightboxImage" src="" alt="To'liq rasm" class="modal-image max-h-full max-w-full object-contain rounded-2xl">
         </div>
     </div>
 
@@ -168,7 +261,7 @@
             await loadPosts(1, '', '');
             setupInfiniteScroll();
             setupMobileMenu();
-            setupModalEvents(); // Modal eventlarini o'rnatish
+            setupModalEvents();
         });
 
         // Infinite Scroll o'rnatish
@@ -201,7 +294,7 @@
                 
                 if (response.ok) {
                     const newPosts = await response.json();
-                    hasMore = newPosts.length === 6; // Agar to'liq limit bo'lmasa, tugagan
+                    hasMore = newPosts.length === 6;
 
                     if (append) {
                         posts = [...posts, ...newPosts];
@@ -212,7 +305,6 @@
                         displayPostsWithAnimation(newPosts);
                     }
                 } else {
-                    // Agar 401 bo'lsa, token muddati tugagan, chiqish
                     if (response.status === 401) {
                         localStorage.removeItem('token');
                         localStorage.removeItem('user');
@@ -223,7 +315,6 @@
                 }
             } catch (error) {
                 console.error('Xatolik:', error);
-                // Xatolikni konsolda ko'rsatish uchun alert o'rniga console.log ishlatish, sahifa yangilanmasin
                 console.log('Postlarni yuklab bo\'lmadi: ', error.message);
                 hasMore = false;
             } finally {
@@ -243,7 +334,7 @@
             const container = document.getElementById('postsContainer');
             container.innerHTML = '';
             for (let i = 0; i < postsToShow.length; i++) {
-                await new Promise(resolve => setTimeout(resolve, 100)); // Kichik delay
+                await new Promise(resolve => setTimeout(resolve, 100));
                 appendPostWithAnimation(postsToShow[i], i);
             }
         }
@@ -251,7 +342,7 @@
         // Yangi postlarni animatsiya bilan qo'shish
         async function appendPostsWithAnimation(newPosts) {
             for (let i = 0; i < newPosts.length; i++) {
-                await new Promise(resolve => setTimeout(resolve, 150)); // Stagger delay
+                await new Promise(resolve => setTimeout(resolve, 150));
                 appendPostWithAnimation(newPosts[i], posts.length - newPosts.length + i);
             }
         }
@@ -260,49 +351,79 @@
         function appendPostWithAnimation(post, index) {
             const container = document.getElementById('postsContainer');
             const postElement = createPostElement(post);
-            postElement.classList.add('stagger-item', 'animate-stagger-fade', 'opacity-0');
-            postElement.style.animationDelay = (index % 6) * 0.1 + 's'; // Stagger delay
+            postElement.classList.add('stagger-item', 'animate-stagger-fade', 'opacity-0', 'luxury-card');
+            postElement.style.animationDelay = (index % 6) * 0.1 + 's';
             container.appendChild(postElement);
-            // Animatsiyani boshlash
             setTimeout(() => postElement.classList.remove('opacity-0'), 10);
+            postElement.classList.add('animate-luxury-glow');
         }
 
-        // Post elementini yaratish
+        // Post elementini yaratish (yaxshilangan dizayn)
         function createPostElement(post) {
+            const avatarUrl = post.author.profile.avatar ? `${API_BASE}/uploads/avatars/${post.author.profile.avatar}` : `${API_BASE}/uploads/avatars/default.png`;
+            const imageUrl = post.image ? `${API_BASE}/uploads/posts/${post.image}` : '';
+            
             const postElement = document.createElement('div');
-            postElement.className = 'post-card bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 animate-fade-in-up';
+            postElement.className = 'post-card rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 animate-fade-in-up cursor-pointer';
             postElement.innerHTML = `
-                <div class="post-header flex items-center gap-3 p-4 bg-gradient-to-r from-teal-50 to-teal-100">
-                    <img src="/uploads/avatars/${post.author.profile.avatar || 'default.png'}" 
-                         alt="Avatar" class="avatar w-10 h-10 rounded-full object-cover cursor-pointer hover:scale-105 transition-transform"
-                         onclick="viewProfile('${post.author._id}')">
-                    <div>
-                        <h4 class="font-semibold text-gray-800">${post.author.profile.firstName} ${post.author.profile.lastName}</h4>
-                        <small class="text-teal-600">@${post.author.username}</small>
+                <div class="post-header flex items-center gap-4 p-6 bg-gradient-to-r from-teal-50 via-white to-gold-accent/10 border-b border-teal-100">
+                    <img src="${avatarUrl}" 
+                         alt="Avatar" class="profile-img w-12 h-12 rounded-full object-cover cursor-pointer"
+                         onclick="viewProfile('${post.author._id}'); event.stopPropagation();"
+                         onerror="this.src='${API_BASE}/uploads/avatars/default.png'">
+                    <div class="flex-1 min-w-0">
+                        <h4 class="font-bold text-gray-800 truncate text-lg">${post.author.profile.firstName} ${post.author.profile.lastName}</h4>
+                        <small class="text-teal-600 font-medium">@${post.author.username}</small>
                     </div>
+                    <div class="text-xs text-gray-500">${new Date(post.createdAt).toLocaleDateString('uz-UZ')}</div>
                 </div>
-                ${post.image ? `<img src="/uploads/posts/${post.image}" class="post-image w-full h-48 object-cover cursor-pointer hover:brightness-105 transition-all">` : ''}
-                <div class="p-4">
-                    <h3 class="text-lg font-bold text-gray-900 mb-2">${post.title}</h3>
-                    <p class="text-gray-600 mb-4 line-clamp-3">${post.content}</p>
-                    <div class="post-actions flex gap-4 mb-3">
-                        <button onclick="toggleLike('${post._id}')" class="like-btn flex items-center gap-1 text-teal-600 hover:text-teal-700 transition-colors ${post.likes.includes(currentUser.id) ? 'text-red-500' : ''}">
-                            👍 ${post.likes.length}
-                        </button>
-                        <button onclick="showComments('${post._id}')" class="comment-btn flex items-center gap-1 text-teal-600 hover:text-teal-700 transition-colors">
-                            💬 ${post.comments.length}
-                        </button>
-                        <button onclick="sharePost('${post._id}')" class="share-btn flex items-center gap-1 text-teal-600 hover:text-teal-700 transition-colors">
-                            🔗 Ulashish
-                        </button>
+                ${imageUrl ? `<div class="post-image relative overflow-hidden">
+                    <img src="${imageUrl}" class="w-full h-56 object-cover" 
+                         onclick="openImageModal('${imageUrl}'); event.stopPropagation();"
+                         onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\"w-full h-56 bg-gray-200 flex items-center justify-center rounded-b-xl\"><p class=\"text-gray-500\">Rasm yuklanmadi</p></div>'">
+                </div>` : ''}
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-3 leading-tight">${post.title}</h3>
+                    <p class="text-gray-600 mb-6 line-clamp-4 leading-relaxed text-sm">${post.content}</p>
+                    <div class="post-actions flex justify-between items-center mb-4">
+                        <div class="flex gap-6">
+                            <button onclick="toggleLike('${post._id}'); event.stopPropagation();" class="like-btn flex items-center gap-2 text-teal-600 hover:text-red-500 transition-all font-medium ${post.likes.includes(currentUser.id) ? 'text-red-500' : ''}">
+                                <span class="text-lg">❤️</span> ${post.likes.length}
+                            </button>
+                            <button onclick="showComments('${post._id}'); event.stopPropagation();" class="comment-btn flex items-center gap-2 text-teal-600 hover:text-teal-700 transition-all font-medium">
+                                <span class="text-lg">💬</span> ${post.comments.length}
+                            </button>
+                            <button onclick="sharePost('${post._id}'); event.stopPropagation();" class="share-btn flex items-center gap-2 text-teal-600 hover:text-teal-700 transition-all font-medium">
+                                <span class="text-lg">🔗</span> Ulashish
+                            </button>
+                        </div>
                     </div>
-                    <div class="post-category">
-                        <span class="inline-block bg-gold-accent text-white px-3 py-1 rounded-full text-sm font-medium">${post.category}</span>
+                    <div class="post-category flex justify-end">
+                        <span class="inline-block bg-gradient-to-r from-gold-accent to-amber-500 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-md">${post.category}</span>
                     </div>
                 </div>
             `;
+            // Butun kartani modalga ochish uchun
+            postElement.addEventListener('click', () => showComments(post._id));
             return postElement;
         }
+
+        // Rasm modalini ochish
+        function openImageModal(imageUrl) {
+            const modal = document.getElementById('imageModal');
+            const lightboxImage = document.getElementById('lightboxImage');
+            lightboxImage.src = imageUrl;
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Rasm modalini yopish
+        document.getElementById('imageModal').addEventListener('click', (e) => {
+            if (e.target.id === 'imageModal' || e.target.classList.contains('close-image')) {
+                document.getElementById('imageModal').classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        });
 
         // Like bosish
         async function toggleLike(postId) {
@@ -318,7 +439,7 @@
                 
                 if (response.ok) {
                     const result = await response.json();
-                    await loadPosts(currentPage, searchTerm, categoryFilter, currentPage > 1); // Yangilash
+                    await loadPosts(currentPage, searchTerm, categoryFilter, currentPage > 1);
                 } else if (response.status === 401) {
                     localStorage.removeItem('token');
                     localStorage.removeItem('user');
@@ -329,7 +450,7 @@
             }
         }
 
-        // Kommentariyalarni ko'rsatish
+        // Kommentariyalarni ko'rsatish (yaxshilangan dizayn)
         async function showComments(postId) {
             const post = posts.find(p => p._id === postId);
             if (!post) return;
@@ -337,75 +458,94 @@
             const modal = document.getElementById('postModal');
             const details = document.getElementById('postDetails');
             
+            const avatarUrl = post.author.profile.avatar ? `${API_BASE}/uploads/avatars/${post.author.profile.avatar}` : `${API_BASE}/uploads/avatars/default.png`;
+            const imageUrl = post.image ? `${API_BASE}/uploads/posts/${post.image}` : '';
+            
             details.innerHTML = `
                 <div class="post-full">
-                    <div class="post-header flex items-center gap-3 p-4 bg-gradient-to-r from-teal-50 to-teal-100 mb-4 rounded-lg">
-                        <img src="/uploads/avatars/${post.author.profile.avatar || 'default.png'}" 
-                             alt="Avatar" class="avatar w-12 h-12 rounded-full object-cover cursor-pointer hover:scale-105"
-                             onclick="viewProfile('${post.author._id}')">
-                        <div>
-                            <h4 class="font-semibold text-gray-800 text-lg">${post.author.profile.firstName} ${post.author.profile.lastName}</h4>
-                            <small class="text-teal-600">@${post.author.username}</small>
+                    <div class="post-header flex items-center gap-4 p-6 bg-gradient-to-r from-teal-50 via-white to-gold-accent/10 mb-6 rounded-2xl border border-teal-100">
+                        <img src="${avatarUrl}" 
+                             alt="Avatar" class="profile-img w-16 h-16 rounded-full object-cover cursor-pointer"
+                             onclick="viewProfile('${post.author._id}');"
+                             onerror="this.src='${API_BASE}/uploads/avatars/default.png'">
+                        <div class="flex-1">
+                            <h4 class="font-bold text-gray-800 text-xl">${post.author.profile.firstName} ${post.author.profile.lastName}</h4>
+                            <small class="text-teal-600 font-medium">@${post.author.username}</small>
+                            <p class="text-gray-500 text-sm mt-1">${new Date(post.createdAt).toLocaleDateString('uz-UZ')}</p>
                         </div>
                     </div>
-                    ${post.image ? `<img src="/uploads/posts/${post.image}" class="post-image w-full h-64 object-cover rounded-lg mb-4 cursor-pointer hover:brightness-105">` : ''}
-                    <h3 class="text-2xl font-bold text-gray-900 mb-3">${post.title}</h3>
-                    <p class="text-gray-700 mb-6 leading-relaxed">${post.content}</p>
+                    ${imageUrl ? `<div class="mb-6 overflow-hidden rounded-2xl shadow-lg">
+                        <img src="${imageUrl}" class="w-full h-80 object-cover cursor-pointer" 
+                             onclick="openImageModal('${imageUrl}');"
+                             onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\"w-full h-80 bg-gray-200 flex items-center justify-center rounded-2xl\"><p class=\"text-gray-500\">Rasm yuklanmadi</p></div>'">
+                    </div>` : ''}
+                    <h3 class="text-3xl font-bold text-gray-900 mb-4 leading-tight">${post.title}</h3>
+                    <p class="text-gray-700 mb-8 leading-relaxed text-lg">${post.content}</p>
                     
                     <div class="comments-section">
-                        <h4 class="text-xl font-semibold text-gray-800 mb-4">Kommentariyalar (${post.comments.length})</h4>
-                        <div class="comment-form flex gap-3 mb-6 p-3 bg-gray-50 rounded-lg">
-                            <input type="text" id="commentText" placeholder="Kommentariya qo'shish..." class="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
-                            <button onclick="addComment('${post._id}')" class="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg font-semibold transition-all">Yuborish</button>
+                        <h4 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                            💬 Kommentariyalar (<span id="commentCount">${post.comments.length}</span>)
+                        </h4>
+                        <div class="comment-form flex gap-4 mb-8 p-5 bg-gradient-to-r from-teal-50 to-teal-100 rounded-2xl border border-teal-200">
+                            <input type="text" id="commentText" placeholder="O'z fikringizni yozing..." class="flex-1 p-4 border border-teal-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white">
+                            <button onclick="addComment('${post._id}')" class="bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white px-8 py-4 rounded-xl font-semibold transition-all shadow-lg">Yuborish</button>
                         </div>
-                        <div class="comments-list space-y-4">
-                            ${post.comments.map(comment => `
-                                <div class="comment bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                                    <div class="comment-header flex items-center gap-3 mb-2">
-                                        <img src="/uploads/avatars/${comment.user.profile.avatar || 'default.png'}" 
-                                             alt="Avatar" class="avatar-small w-8 h-8 rounded-full object-cover cursor-pointer"
-                                             onclick="viewProfile('${comment.user._id}')">
-                                        <div>
-                                            <strong class="text-gray-800">${comment.user.profile.firstName} ${comment.user.profile.lastName}</strong>
-                                            <small class="text-gray-500 ml-2">${new Date(comment.createdAt).toLocaleDateString()}</small>
+                        <div class="comments-list space-y-5">
+                            ${post.comments.map(comment => {
+                                const commentAvatar = comment.user.profile.avatar ? `${API_BASE}/uploads/avatars/${comment.user.profile.avatar}` : `${API_BASE}/uploads/avatars/default.png`;
+                                return `
+                                <div class="comment comment-bubble p-5 rounded-2xl shadow-sm border border-teal-100">
+                                    <div class="comment-header flex items-start gap-4 mb-3">
+                                        <img src="${commentAvatar}" 
+                                             alt="Avatar" class="profile-img w-10 h-10 rounded-full object-cover cursor-pointer mt-1 flex-shrink-0"
+                                             onclick="viewProfile('${comment.user._id}');"
+                                             onerror="this.src='${API_BASE}/uploads/avatars/default.png'">
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center gap-2">
+                                                <strong class="text-gray-800 font-semibold">${comment.user.profile.firstName} ${comment.user.profile.lastName}</strong>
+                                                <small class="text-gray-500">${new Date(comment.createdAt).toLocaleDateString('uz-UZ')}</small>
+                                            </div>
+                                            <p class="text-gray-700 leading-relaxed">${comment.text}</p>
                                         </div>
                                     </div>
-                                    <p class="text-gray-700 mb-3">${comment.text}</p>
-                                    <button onclick="showReplyForm('${post._id}', '${comment._id}')" class="text-teal-600 hover:text-teal-700 text-sm font-medium transition-colors">Javob berish</button>
+                                    <button onclick="showReplyForm('${post._id}', '${comment._id}')" class="text-teal-600 hover:text-teal-700 text-sm font-medium transition-colors flex items-center gap-1">
+                                        ↳ Javob berish
+                                    </button>
                                     
-                                    <div class="replies mt-4 ml-8 space-y-2">
-                                        ${comment.replies.map(reply => `
-                                            <div class="reply bg-gray-50 p-3 rounded-md">
-                                                <div class="comment-header flex items-center gap-2 mb-1">
-                                                    <img src="/uploads/avatars/${reply.user.profile.avatar || 'default.png'}" 
-                                                         alt="Avatar" class="avatar-small w-6 h-6 rounded-full object-cover cursor-pointer"
-                                                         onclick="viewProfile('${reply.user._id}')">
-                                                    <strong class="text-sm text-gray-800">${reply.user.profile.firstName} ${reply.user.profile.lastName}</strong>
-                                                    <small class="text-gray-500 text-xs">${new Date(reply.createdAt).toLocaleDateString()}</small>
+                                    <div class="replies mt-4 ml-12 space-y-3">
+                                        ${comment.replies.map(reply => {
+                                            const replyAvatar = reply.user.profile.avatar ? `${API_BASE}/uploads/avatars/${reply.user.profile.avatar}` : `${API_BASE}/uploads/avatars/default.png`;
+                                            return `
+                                            <div class="reply bg-white/80 p-4 rounded-xl shadow-sm border border-gray-200">
+                                                <div class="comment-header flex items-center gap-3 mb-2">
+                                                    <img src="${replyAvatar}" 
+                                                         alt="Avatar" class="profile-img w-8 h-8 rounded-full object-cover cursor-pointer"
+                                                         onclick="viewProfile('${reply.user._id}');"
+                                                         onerror="this.src='${API_BASE}/uploads/avatars/default.png'">
+                                                    <div class="flex-1 min-w-0">
+                                                        <strong class="text-sm text-gray-800 block truncate">${reply.user.profile.firstName} ${reply.user.profile.lastName}</strong>
+                                                        <small class="text-gray-500 text-xs block">${new Date(reply.createdAt).toLocaleDateString('uz-UZ')}</small>
+                                                    </div>
                                                 </div>
                                                 <p class="text-sm text-gray-700">${reply.text}</p>
                                             </div>
-                                        `).join('')}
+                                        `}).join('')}
                                     </div>
                                     
-                                    <div id="replyForm-${comment._id}" class="reply-form mt-3 hidden flex gap-2">
-                                        <input type="text" id="replyText-${comment._id}" placeholder="Javob yozish..." class="flex-1 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500">
-                                        <button onclick="addReply('${post._id}', '${comment._id}')" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded transition-all">Yuborish</button>
+                                    <div id="replyForm-${comment._id}" class="reply-form mt-4 hidden flex gap-3 p-3 bg-gray-50 rounded-xl">
+                                        <input type="text" id="replyText-${comment._id}" placeholder="Javob yozing..." class="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                        <button onclick="addReply('${post._id}', '${comment._id}')" class="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg transition-all font-medium">Yuborish</button>
                                     </div>
                                 </div>
-                            `).join('')}
+                            `}).join('')}
                         </div>
+                        ${post.comments.length === 0 ? '<p class="text-center text-gray-500 italic py-8">Hozircha kommentariya yo\'q. Birinchisi bo\'ling!</p>' : ''}
                     </div>
                 </div>
             `;
             
             modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden'; // Scroll bloklash
-            // Modal ochilganda close event qo'shish
-            const closeBtn = details.querySelector('.close');
-            if (closeBtn) {
-                closeBtn.addEventListener('click', closeModal);
-            }
+            document.body.style.overflow = 'hidden';
         }
 
         // Modal yopish
@@ -423,9 +563,14 @@
             }
         });
 
-        // Modal eventlarini o'rnatish (umumiy)
+        // Modal eventlarini o'rnatish
         function setupModalEvents() {
-            // Bu yerda qo'shimcha eventlar bo'lishi mumkin
+            // Modal ichidagi close tugmasi
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('close')) {
+                    closeModal();
+                }
+            });
         }
 
         // Kommentariya qo'shish
@@ -447,7 +592,7 @@
                 if (response.ok) {
                     document.getElementById('commentText').value = '';
                     await loadPosts(currentPage, searchTerm, categoryFilter, currentPage > 1);
-                    showComments(postId); // Yangilash
+                    showComments(postId);
                 } else if (response.status === 401) {
                     localStorage.removeItem('token');
                     localStorage.removeItem('user');
@@ -483,7 +628,7 @@
                 if (response.ok) {
                     document.getElementById(`replyText-${commentId}`).value = '';
                     await loadPosts(currentPage, searchTerm, categoryFilter, currentPage > 1);
-                    showComments(postId); // Yangilash
+                    showComments(postId);
                 } else if (response.status === 401) {
                     localStorage.removeItem('token');
                     localStorage.removeItem('user');
@@ -509,14 +654,14 @@
             if (navigator.share) {
                 navigator.share({
                     title: post.title,
-                    text: post.content,
+                    text: post.content.substring(0, 100) + '...',
                     url: shareUrl
                 });
             } else {
                 navigator.clipboard.writeText(shareUrl).then(() => {
-                    alert('Havola nusxalandi!');
+                    alert('Havola nusxalandi! Do\'stlaringizga ulashing.');
                 }).catch(() => {
-                    alert('Havola nusxalanmadi!');
+                    alert('Havola nusxalanmadi. Qo\'lda nusxalang: ' + shareUrl);
                 });
             }
         }
@@ -557,9 +702,8 @@
         const urlParams = new URLSearchParams(window.location.search);
         const postId = urlParams.get('post');
         if (postId) {
-            // Postni topish va modalni ochish (await bilan)
             (async () => {
-                await loadPosts(1, '', ''); // Dastlab yuklash
+                await loadPosts(1, '', '');
                 const post = posts.find(p => p._id === postId);
                 if (post) {
                     showComments(postId);

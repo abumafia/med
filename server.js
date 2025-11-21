@@ -593,6 +593,27 @@ app.get('/api/appointments', authenticateToken, async (req, res) => {
   }
 });
 
+app.get('/api/appointments/:id', authenticateToken, async (req, res) => {
+  try {
+    const appointment = await Appointment.findById(req.params.id)
+      .populate('patient', 'username profile.avatar profile.firstName profile.lastName')
+      .populate('doctor', 'username profile.avatar profile.firstName profile.lastName profile.specialization');
+    
+    if (!appointment) {
+      return res.status(404).json({ message: 'Qabul topilmadi' });
+    }
+    
+    // Check access: owner or patient/doctor
+    if (appointment.patient.toString() !== req.user.userId && appointment.doctor.toString() !== req.user.userId && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Ruxsat yo\'q' });
+    }
+    
+    res.json(appointment);
+  } catch (error) {
+    res.status(500).json({ message: 'Server xatosi', error: error.message });
+  }
+});
+
 app.put('/api/appointments/:id', authenticateToken, async (req, res) => {
   try {
     const { status, rating, feedback } = req.body;
